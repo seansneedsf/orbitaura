@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timeline View - Project Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Vis Timeline CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/vis-timeline/7.7.0/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css" />
+    <!-- Vis Timeline JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-timeline/7.7.0/vis-timeline-graph2d.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        aura: {
+                            bg: '#0d0e10',
+                            card: '#13141a',
+                            border: '#1f2023',
+                            accent: '#5e6ad2',
+                            purple: '#8b5cf6',
+                            text: '#b4bcd0',
+                            muted: '#7c8794',
+                            darker: '#070707',
+                            lighter: '#1a1a1a'
+                        }
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-effect {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .header-card {
+            background: linear-gradient(135deg,
+                    rgba(19, 20, 26, 0.95) 0%,
+                    rgba(31, 32, 35, 0.8) 100%);
+            border: 1px solid rgba(31, 32, 35, 0.8);
+        }
+
+        .nav-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(31, 32, 35, 0.8);
+            border: 1px solid rgba(94, 106, 210, 0.2);
+            transition: all 0.2s ease;
+            font-size: 12px;
+        }
+
+        .nav-icon:hover {
+            background: rgba(94, 106, 210, 0.1);
+            border-color: rgba(94, 106, 210, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .stat-divider {
+            width: 1px;
+            background: linear-gradient(180deg, transparent, rgba(94, 106, 210, 0.3) 50%, transparent);
+            height: 20px;
+        }
+
+        /* Timeline container styling */
+        .timeline-card {
+            background: linear-gradient(135deg,
+                    rgba(19, 20, 26, 0.9) 0%,
+                    rgba(31, 32, 35, 0.5) 100%);
+            border: 1px solid rgba(31, 32, 35, 0.8);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+            min-height: calc(100vh - 200px);
+        }
+
+        .timeline-header {
+            padding: 1.5rem 2rem 1rem;
+            border-bottom: 1px solid rgba(31, 32, 35, 0.8);
+        }
+
+        .timeline-header h1 {
+            margin: 0;
+            font-size: 1.875rem;
+            font-weight: 600;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .timeline-content {
+            padding: 1.5rem;
+            height: calc(100vh - 280px);
+            min-height: 500px;
+        }
+
+        #timelineContainer {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+            border: 1px solid rgba(31, 32, 35, 0.8);
+            box-sizing: border-box;
+            background: rgba(19, 20, 26, 0.5);
+        }
+
+        /* Enhanced timeline item styles */
+        .vis-item.status-to-do { 
+            background: linear-gradient(135deg, #f59e0b, #d97706); 
+            border-color: #d97706; 
+            color: white; 
+            box-shadow: 0 2px 8px rgba(217, 119, 6, 0.3);
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        
+        .vis-item.status-in-progress { 
+            background: linear-gradient(135deg, #5e6ad2, #4c51bf); 
+            border-color: #4c51bf; 
+            color: white; 
+            box-shadow: 0 2px 8px rgba(94, 106, 210, 0.3);
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        
+        .vis-item.status-to-be-review { 
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed); 
+            border-color: #7c3aed; 
+            color: white;
+            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        
+        .vis-item.status-done { 
+            background: linear-gradient(135deg, #10b981, #16a34a); 
+            border-color: #16a34a; 
+            color: white; 
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        
+        .vis-item:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2) !important;
+        }
+        
+        .vis-item.vis-selected { 
+            border-width: 3px !important; 
+            border-color: #5e6ad2 !important;
+            box-shadow: 0 6px 20px rgba(94, 106, 210, 0.4) !important;
+            transform: translateY(-2px) !important;
+            z-index: 100 !important;
+        }
+
+        /* Project background items */
+        .vis-item.vis-background {
+            opacity: 0.08;
+            border-radius: 8px;
+            background: linear-gradient(135deg, rgba(94, 106, 210, 0.1), rgba(139, 92, 246, 0.1)) !important;
+        }
+
+        /* Timeline axis and grid styling */
+        .vis-timeline {
+            border: none !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+
+        .vis-panel.vis-background {
+            background: rgba(19, 20, 26, 0.3) !important;
+        }
+
+        .vis-panel.vis-top,
+        .vis-panel.vis-bottom {
+            background: rgba(19, 20, 26, 0.8) !important;
+            border-color: rgba(31, 32, 35, 0.8) !important;
+        }
+
+        .vis-labelset .vis-label {
+            background: rgba(19, 20, 26, 0.9) !important;
+            border-color: rgba(31, 32, 35, 0.8) !important;
+            color: #b4bcd0 !important;
+            font-weight: 600 !important;
+            padding: 8px 12px !important;
+        }
+
+        .vis-labelset .vis-label:hover {
+            background: rgba(94, 106, 210, 0.1) !important;
+        }
+
+        .vis-time-axis .vis-text {
+            color: #b4bcd0 !important;
+            font-weight: 500 !important;
+            font-size: 12px !important;
+        }
+
+        .vis-time-axis .vis-text.vis-major {
+            font-weight: 700 !important;
+            color: #5e6ad2 !important;
+        }
+
+        .vis-time-axis .vis-grid.vis-minor {
+            border-color: rgba(31, 32, 35, 0.3) !important;
+        }
+
+        .vis-time-axis .vis-grid.vis-major {
+            border-color: rgba(31, 32, 35, 0.8) !important;
+        }
+
+        .vis-current-time {
+            background: #ef4444 !important;
+            border-color: #ef4444 !important;
+            opacity: 0.8 !important;
+        }
+
+        /* Timeline item content styling */
+        .vis-item .vis-item-content {
+            padding: 6px 12px !important;
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;
+        }
+
+        /* Tooltip styling */
+        .vis-tooltip {
+            background: rgba(19, 20, 26, 0.95) !important;
+            color: #b4bcd0 !important;
+            border-radius: 8px !important;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
+            font-size: 13px !important;
+            font-weight: 500 !important;
+            padding: 8px 12px !important;
+            border: 1px solid rgba(31, 32, 35, 0.8) !important;
+        }
+
+        /* Timeline controls */
+        .timeline-controls {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            cursor: pointer;
+        }
+
+        .btn-secondary {
+            background: rgba(107, 114, 128, 0.1);
+            color: #6b7280;
+            border-color: rgba(107, 114, 128, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(107, 114, 128, 0.2);
+            border-color: rgba(107, 114, 128, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary.active {
+            background: #5e6ad2;
+            color: white;
+            border-color: #5e6ad2;
+        }
+
+        /* Status legend */
+        .status-legend {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: #b4bcd0;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            border: 1px solid rgba(31, 32, 35, 0.5);
+        }
+
+        .legend-color.to-do { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .legend-color.in-progress { background: linear-gradient(135deg, #5e6ad2, #4c51bf); }
+        .legend-color.to-be-review { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+        .legend-color.done { background: linear-gradient(135deg, #10b981, #16a34a); }
+
+        /* Empty state */
+        .timeline-empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #7c8794;
+            text-align: center;
+        }
+
+        .timeline-empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .timeline-empty-state h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.125rem;
+            color: #b4bcd0;
+        }
+
+        .timeline-empty-state p {
+            margin: 0;
+            font-size: 0.875rem;
+        }
+
+        /* Flash Messages */
+        .flash-messages {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            z-index: 50;
+        }
+
+        .flash-messages li {
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            border: 1px solid transparent;
+            background: rgba(19, 20, 26, 0.95);
+            color: #b4bcd0;
+            border-color: rgba(31, 32, 35, 0.8);
+        }
+
+        .flash-messages .success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .flash-messages .danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .flash-messages .warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+            border-color: rgba(245, 158, 11, 0.2);
+        }
+
+        .flash-messages .info {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+            border-color: rgba(59, 130, 246, 0.2);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .timeline-card {
+                margin: 1rem;
+            }
+            
+            .timeline-content {
+                padding: 1rem;
+                height: calc(100vh - 240px);
+            }
+            
+            .status-legend {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-aura-bg text-aura-text font-inter min-h-screen">
+
+    <div class="flex flex-col md:flex-row h-screen">
+        <!-- Mobile header -->
+        <header class="md:hidden bg-darker p-4 flex justify-between items-center border-b border-lighter">
+            <div class="flex items-center space-x-2">
+                <div class="h-6 w-6 rounded-md bg-accent"></div>
+                <span class="font-medium">Timeline</span>
+            </div>
+            <button id="menuToggle" class="text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16">
+                    </path>
+                </svg>
+            </button>
+        </header>
+
+        <!-- Sidebar -->
+        <div id="sidebar"
+            class="hidden md:block w-full md:w-64 header-card flex-shrink-0 flex flex-col h-screen md:h-auto overflow-y-auto">
+            <div class="p-4 md:block hidden">
+                <div class="flex items-center space-x-2">
+                    <div class="h-6 w-6 rounded-md bg-accent"></div>
+                    <span class="font-medium">Workspace</span>
+                </div>
+            </div>
+
+            <nav class="flex-1 py-4">
+                <div class="px-3 mb-2 text-xs font-medium text-muted">WORKSPACE</div>
+                <a href="{{ url_for('overview_view') }}"
+                    class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
+                        </path>
+                    </svg>
+                    Home
+                </a>
+                <a href="{{ url_for('index') }}"
+                    class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01">
+                        </path>
+                    </svg>
+                    Issues
+                </a>
+                <a href="{{ url_for('manage_projects') }}"
+                    class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 7h5l2 3h11v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" />
+                    </svg>
+                    Projects
+                </a>
+                <a href="{{ url_for('calendar_view') }}"
+                    class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                        </path>
+                    </svg>
+                    Analytics
+                </a>
+                <a href="{{ url_for('timeline_view') }}"
+                    class="flex items-center px-3 py-2 text-sm text-white bg-aura-purple rounded-md mx-2 mt-1">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z">
+                        </path>
+                    </svg>
+                    Timeline
+                </a>
+
+                <div class="px-3 mt-6 mb-2 text-xs font-medium text-muted">TEAMS</div>
+                <a href="#"
+                    class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2">
+                    <div class="w-4 h-4 rounded-sm bg-purple-500 mr-3"></div>
+                    Design
+                </a>
+                <a href="#"
+                    class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <div class="w-4 h-4 rounded-sm bg-blue-500 mr-3"></div>
+                    Engineering
+                </a>
+                <a href="#"
+                    class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <div class="w-4 h-4 rounded-sm bg-green-500 mr-3"></div>
+                    Product
+                </a>
+            </nav>
+
+            <div class="p-4 border-t border-aura-border">
+                <div class="flex items-center">
+                    <div class="w-8 h-8 rounded-full bg-accent flex items-center justify-center">
+                        <span class="text-sm font-medium">JS</span>
+                    </div>
+                    <div class="ml-2">
+                        <div class="text-sm font-medium">John Smith</div>
+                        <div class="text-xs text-muted">My Workspace</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="flex-1 flex flex-col overflow-y-auto">
+            <!-- Timeline Header -->
+            <div class="max-w-7xl mx-auto p-8 w-full">
+                <div class="header-card glass-effect rounded-2xl p-8 mb-8">
+                    <!-- Timeline Header Content -->
+                    <div class="flex items-start justify-between mb-6">
+                        <div>
+                            <h1 class="text-3xl font-semibold text-white mb-1 flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-aura-accent/20 flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-aura-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                Project Timeline
+                            </h1>
+                            <p class="text-aura-muted">Visualize project and task schedules across time</p>
+                        </div>
+
+                        <!-- Navigation Icons -->
+                        <div class="flex items-center gap-3">
+                            <a href="{{ url_for('overview_view') }}" class="nav-icon text-aura-text hover:text-white" title="Dashboard">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                </svg>
+                            </a>
+                            <a href="{{ url_for('manage_projects') }}" class="nav-icon text-aura-text hover:text-white" title="Projects">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h5l2 3h11v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" />
+                                </svg>
+                            </a>
+                            <a href="{{ url_for('calendar_view') }}" class="nav-icon text-aura-text hover:text-white" title="Calendar">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </a>
+                            <a href="{{ url_for('index') }}" class="nav-icon text-aura-text hover:text-white" title="Issues">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="flex items-center gap-3 mt-6 pt-6 border-t border-aura-border">
+                        <span class="text-xs text-aura-muted">Quick Actions:</span>
+                        <a href="{{ url_for('manage_projects') }}" class="btn btn-secondary">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                <path d="M12 8v8m4-4H8" />
+                            </svg>
+                            New Project
+                        </a>
+                        <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                            </svg>
+                            All Issues
+                        </a>
+                        <a href="{{ url_for('overview_view') }}" class="btn btn-secondary">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                            </svg>
+                            Dashboard
+                        </a>
+                    </div>
+                </div>
+
+                <div class="timeline-card">
+                    <div class="timeline-content">
+                        <div class="timeline-controls">
+                            <div class="status-legend">
+                                <div class="legend-item">
+                                    <div class="legend-color to-do"></div>
+                                    <span>To-Do</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color in-progress"></div>
+                                    <span>In Progress</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color to-be-review"></div>
+                                    <span>Review</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color done"></div>
+                                    <span>Done</span>
+                                </div>
+                            </div>
+                            <div style="flex: 1;"></div>
+                            <button id="fitViewBtn" class="btn btn-secondary" title="Fit timeline to window">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                    <path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/>
+                                </svg>
+                                Fit View
+                            </button>
+                            <button id="todayBtn" class="btn btn-secondary" title="Go to today">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                    <line x1="16" y1="2" x2="16" y2="6"/>
+                                    <line x1="8" y1="2" x2="8" y2="6"/>
+                                    <line x1="3" y1="10" x2="21" y2="10"/>
+                                </svg>
+                                Today
+                            </button>
+                            <button id="zoomInBtn" class="btn btn-secondary" title="Zoom in">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                    <circle cx="11" cy="11" r="8"/>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                                    <line x1="11" y1="8" x2="11" y2="14"/>
+                                    <line x1="8" y1="11" x2="14" y2="11"/>
+                                </svg>
+                                Zoom In
+                            </button>
+                            <button id="zoomOutBtn" class="btn btn-secondary" title="Zoom out">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                    <circle cx="11" cy="11" r="8"/>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                                    <line x1="8" y1="11" x2="14" y2="11"/>
+                                </svg>
+                                Zoom Out
+                            </button>
+                        </div>
+                        <div id="timelineContainer"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <ul class="flash-messages">
+                {% for category, message in messages %}
+                <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+
+                <script type="text/javascript">
+                    let timeline; // Global timeline variable for controls
+
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const container = document.getElementById('timelineContainer');
+                        const rawItems = {{ timeline_items_json|safe }};
+
+                        if (!rawItems || rawItems.length === 0) {
+                            container.innerHTML = `
+                                <div class="timeline-empty-state">
+                                    <svg width="64" height="64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                        <line x1="16" y1="2" x2="16" y2="6"/>
+                                        <line x1="8" y1="2" x2="8" y2="6"/>
+                                        <line x1="3" y1="10" x2="21" y2="10"/>
+                                    </svg>
+                                    <h3>No Timeline Data Available</h3>
+                                    <p>Add tasks with dates to see them on the timeline</p>
+                                </div>
+                            `;
+                            return;
+                        }
+
+                        // Separate items for tasks and groups for projects
+                        const items = new vis.DataSet();
+                        const groups = new vis.DataSet();
+                        let projectGroups = new Set();
+
+                        rawItems.forEach(item => {
+                            if (item.group === "Projects") { // This is a project span
+                                // Project spans are handled as background items and don't need to be in 'groups'
+                                items.add({
+                                    id: item.id,
+                                    content: item.content,
+                                    start: item.start,
+                                    end: item.end,
+                                    type: 'background', // Projects shown as background ranges
+                                    style: item.style // Apply custom style if provided
+                                    // Projects do not belong to a group in this setup
+                                });
+                            } else { // This is a task
+                                if (item.group && !projectGroups.has(item.group)) {
+                                    groups.add({
+                                        id: item.group,
+                                        content: item.group // Project name as group label
+                                    });
+                                    projectGroups.add(item.group);
+                                }
+                                items.add({
+                                    id: item.id,
+                                    group: item.group, // Assign task to its project group
+                                    content: item.content,
+                                    start: item.start,
+                                    end: item.end,
+                                    type: 'range', // Tasks are distinct ranges
+                                    className: item.className // For status-based styling
+                                });
+                            }
+                        });
+                        
+                        if (items.length === 0) {
+                            container.innerHTML = `
+                                <div class="timeline-empty-state">
+                                    <svg width="64" height="64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                        <line x1="16" y1="2" x2="16" y2="6"/>
+                                        <line x1="8" y1="2" x2="8" y2="6"/>
+                                        <line x1="3" y1="10" x2="21" y2="10"/>
+                                    </svg>
+                                    <h3>No Valid Timeline Items</h3>
+                                    <p>Tasks and projects need valid date ranges to appear on the timeline</p>
+                                </div>
+                            `;
+                            return;
+                        }
+
+                        let timelineOptions = {
+                            stack: true, // Stack items vertically if they overlap
+                            stackSubgroups: true,
+                            zoomMin: 1000 * 60 * 60 * 24, // Minimum zoom level: 1 day
+                            zoomMax: 1000 * 60 * 60 * 24 * 365 * 5, // Maximum zoom level: 5 years
+                            height: '100%', // Make timeline responsive to container height
+                            editable: {
+                                add: false,
+                                updateTime: false,
+                                updateGroup: false,
+                                remove: false,
+                                overrideItems: false
+                            },
+                            margin: {
+                                item: 20,
+                                axis: 20
+                            },
+                            tooltip: {
+                                followMouse: true,
+                                overflowMethod: 'flip'
+                            },
+                            groupOrder: function (a, b) {
+                                return a.id.localeCompare(b.id);
+                            }
+                        };
+
+                        if (groups.length > 0) {
+                            timelineOptions.groupTemplate = function(group) {
+                                return group.content;
+                            };
+                        }
+
+                        // Create a Timeline
+                        timeline = new vis.Timeline(container, items, groups.length > 0 ? groups : null, timelineOptions);
+
+                        timeline.on('select', function (properties) {
+                            if (properties.items.length > 0) {
+                                const selectedItemId = properties.items[0];
+                                if (selectedItemId && selectedItemId.startsWith('task_')) {
+                                    const taskId = selectedItemId.substring(5); // Remove "task_" prefix
+                                    // Redirect to edit task page, or open a modal, etc.
+                                    window.location.href = `/task/edit/${taskId}`;
+                                }
+                                // Could add similar logic for project selection if needed
+                            }
+                        });
+
+                        // Enhanced timeline options for better styling
+                        timeline.setOptions({
+                            showCurrentTime: true,
+                            showMajorLabels: true,
+                            showMinorLabels: true,
+                            orientation: 'top',
+                            format: {
+                                minorLabels: {
+                                    millisecond:'SSS',
+                                    second:     's',
+                                    minute:     'HH:mm',
+                                    hour:       'HH:mm',
+                                    weekday:    'ddd D',
+                                    day:        'D',
+                                    week:       'w',
+                                    month:      'MMM',
+                                    year:       'YYYY'
+                                },
+                                majorLabels: {
+                                    millisecond:'HH:mm:ss',
+                                    second:     'D MMMM HH:mm',
+                                    minute:     'ddd D MMMM',
+                                    hour:       'ddd D MMMM',
+                                    weekday:    'MMMM YYYY',
+                                    day:        'MMMM YYYY',
+                                    week:       'MMMM YYYY',
+                                    month:      'YYYY',
+                                    year:       ''
+                                }
+                            }
+                        });
+
+                        // Add event listeners for control buttons
+                        document.getElementById('fitViewBtn').addEventListener('click', function() {
+                            if (timeline) {
+                                timeline.fit();
+                                this.classList.add('active');
+                                setTimeout(() => this.classList.remove('active'), 200);
+                            }
+                        });
+
+                        document.getElementById('todayBtn').addEventListener('click', function() {
+                            if (timeline) {
+                                timeline.moveTo(new Date());
+                                this.classList.add('active');
+                                setTimeout(() => this.classList.remove('active'), 200);
+                            }
+                        });
+
+                        document.getElementById('zoomInBtn').addEventListener('click', function() {
+                            if (timeline) {
+                                timeline.zoomIn(0.5);
+                                this.classList.add('active');
+                                setTimeout(() => this.classList.remove('active'), 200);
+                            }
+                        });
+
+                        document.getElementById('zoomOutBtn').addEventListener('click', function() {
+                            if (timeline) {
+                                timeline.zoomOut(0.5);
+                                this.classList.add('active');
+                                setTimeout(() => this.classList.remove('active'), 200);
+                            }
+                        });
+
+                        // Fit timeline to content after initialization
+                        setTimeout(() => {
+                            if (timeline) {
+                                timeline.fit();
+                            }
+                        }, 100);
+                    });
+
+        // Auto-hide flash messages
+        document.addEventListener('DOMContentLoaded', function () {
+            const flashMessages = document.querySelectorAll('.flash-messages li');
+            flashMessages.forEach(function (message) {
+                setTimeout(function () {
+                    message.style.opacity = '0';
+                    message.style.transform = 'translateX(100%)';
+                    setTimeout(function () {
+                        message.remove();
+                    }, 300);
+                }, 5000);
+            });
+
+            // Mobile menu toggle
+            document.getElementById('menuToggle').addEventListener('click', function () {
+                const sidebar = document.getElementById('sidebar');
+                sidebar.classList.toggle('hidden');
+            });
+
+            // Enhanced button interactions
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(function (btn) {
+                btn.addEventListener('mouseenter', function () {
+                    this.style.transform = 'translateY(-1px)';
+                });
+
+                btn.addEventListener('mouseleave', function () {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+        });
+                </script>
+</body>
+</html> 

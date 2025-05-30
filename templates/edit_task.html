@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Task: {{ task.title }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        aura: {
+                            bg: '#0d0e10',
+                            card: '#13141a',
+                            border: '#1f2023',
+                            accent: '#5e6ad2',
+                            purple: '#8b5cf6',
+                            text: '#b4bcd0',
+                            muted: '#7c8794',
+                            darker: '#070707',
+                            lighter: '#1a1a1a'
+                        }
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-effect {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .header-card {
+            background: linear-gradient(135deg,
+                    rgba(19, 20, 26, 0.95) 0%,
+                    rgba(31, 32, 35, 0.8) 100%);
+            border: 1px solid rgba(31, 32, 35, 0.8);
+        }
+
+        .nav-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(31, 32, 35, 0.8);
+            border: 1px solid rgba(94, 106, 210, 0.2);
+            transition: all 0.2s ease;
+            font-size: 12px;
+        }
+
+        .nav-icon:hover {
+            background: rgba(94, 106, 210, 0.1);
+            border-color: rgba(94, 106, 210, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .edit-card {
+            background: linear-gradient(135deg,
+                    rgba(19, 20, 26, 0.9) 0%,
+                    rgba(31, 32, 35, 0.5) 100%);
+            border: 1px solid rgba(31, 32, 35, 0.8);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .edit-card:hover {
+            border-color: rgba(94, 106, 210, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            padding: 1.25rem 1.5rem 1rem;
+            border-bottom: 1px solid rgba(31, 32, 35, 0.8);
+        }
+
+        .card-header h2 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid rgba(31, 32, 35, 0.8);
+            border-radius: 6px;
+            background: rgba(31, 32, 35, 0.5);
+            color: #ffffff;
+            font-size: 0.875rem;
+            transition: border-color 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: rgba(94, 106, 210, 0.4);
+            box-shadow: 0 0 0 2px rgba(94, 106, 210, 0.1);
+        }
+
+        .form-control::placeholder {
+            color: #7c8794;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #5e6ad2, #8b5cf6);
+            color: white;
+            border-color: #5e6ad2;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #4c51bf, #7c3aed);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(94, 106, 210, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(107, 114, 128, 0.1);
+            color: #6b7280;
+            border-color: rgba(107, 114, 128, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(107, 114, 128, 0.2);
+            color: #ffffff;
+        }
+
+        .btn-full {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding: 0.75rem 1rem;
+            background: rgba(31, 32, 35, 0.5);
+            border: 1px solid rgba(31, 32, 35, 0.8);
+            border-radius: 8px;
+        }
+
+        .breadcrumb a {
+            color: #5e6ad2;
+            text-decoration: none;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            transition: color 0.2s ease;
+        }
+
+        .breadcrumb a:hover {
+            color: #8b5cf6;
+        }
+
+        .breadcrumb span {
+            color: #7c8794;
+            font-size: 0.875rem;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-todo {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .status-progress {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .status-review {
+            background: rgba(139, 92, 246, 0.2);
+            color: #8b5cf6;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .status-done {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .task-info-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            max-width: 6xl;
+            margin: 0 auto;
+        }
+
+        @media (min-width: 1024px) {
+            .task-info-grid {
+                grid-template-columns: 2fr 1fr;
+            }
+        }
+
+        .flash-messages {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            z-index: 50;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .flash-messages li {
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            border: 1px solid transparent;
+            background: rgba(19, 20, 26, 0.95);
+            backdrop-filter: blur(20px);
+        }
+
+        .flash-messages .success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .flash-messages .danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .flash-messages .warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+            border-color: rgba(245, 158, 11, 0.2);
+        }
+
+        .flash-messages .info {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+            border-color: rgba(59, 130, 246, 0.2);
+        }
+
+        .task-meta {
+            padding: 1rem;
+            background: rgba(31, 32, 35, 0.5);
+            border: 1px solid rgba(31, 32, 35, 0.8);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .task-meta-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(31, 32, 35, 0.5);
+        }
+
+        .task-meta-item:last-child {
+            border-bottom: none;
+        }
+
+        .task-meta-label {
+            font-size: 0.875rem;
+            color: #7c8794;
+            font-weight: 500;
+        }
+
+        .task-meta-value {
+            font-size: 0.875rem;
+            color: #b4bcd0;
+        }
+    </style>
+</head>
+<body class="bg-aura-bg text-aura-text font-inter min-h-screen">
+    <div class="flex flex-col md:flex-row h-screen">
+        <!-- Mobile header -->
+        <header class="md:hidden bg-darker p-4 flex justify-between items-center border-b border-lighter">
+            <div class="flex items-center space-x-2">
+                <div class="h-6 w-6 rounded-md bg-accent"></div>
+                <span class="font-medium">Edit Task</span>
+            </div>
+            <button id="menuToggle" class="text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </header>
+
+        <!-- Sidebar -->
+        <div id="sidebar" class="hidden md:block w-full md:w-64 header-card flex-shrink-0 flex flex-col h-screen md:h-auto overflow-y-auto">
+            <div class="p-4 md:block hidden">
+                <div class="flex items-center space-x-2">
+                    <div class="h-6 w-6 rounded-md bg-accent"></div>
+                    <span class="font-medium">Workspace</span>
+                </div>
+            </div>
+
+            <nav class="flex-1 py-4">
+                <div class="px-3 mb-2 text-xs font-medium text-muted">WORKSPACE</div>
+                <a href="{{ url_for('overview_view') }}" class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    Home
+                </a>
+                <a href="{{ url_for('index') }}" class="flex items-center px-3 py-2 text-sm text-white bg-aura-purple rounded-md mx-2 mt-1">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                    </svg>
+                    Issues
+                </a>
+                <a href="{{ url_for('manage_projects') }}" class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h5l2 3h11v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"></path>
+                    </svg>
+                    Projects
+                </a>
+                <a href="{{ url_for('calendar_view') }}" class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                    Analytics
+                </a>
+                <a href="{{ url_for('timeline_view') }}" class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Timeline
+                </a>
+
+                <div class="px-3 mt-6 mb-2 text-xs font-medium text-muted">TEAMS</div>
+                <a href="#" class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2">
+                    <div class="w-4 h-4 rounded-sm bg-purple-500 mr-3"></div>
+                    Design
+                </a>
+                <a href="#" class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <div class="w-4 h-4 rounded-sm bg-blue-500 mr-3"></div>
+                    Engineering
+                </a>
+                <a href="#" class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <div class="w-4 h-4 rounded-sm bg-green-500 mr-3"></div>
+                    Product
+                </a>
+            </nav>
+
+            <div class="p-4 border-t border-aura-border">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 rounded-full bg-accent flex items-center justify-center">
+                            <span class="text-sm font-medium">{{ current_user.username[0]|upper if current_user.username else 'U' }}</span>
+                        </div>
+                        <div class="ml-2">
+                            <div class="text-sm font-medium">{{ current_user.username if current_user.username else 'User' }}</div>
+                            <div class="text-xs text-muted">My Workspace</div>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <button id="userMenuToggle" class="nav-icon text-aura-text hover:text-white" title="User menu">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div id="userMenu" class="hidden absolute bottom-full right-0 mb-2 w-48 bg-aura-card border border-aura-border rounded-lg shadow-lg">
+                            <div class="py-1">
+                                <a href="{{ url_for('user_settings') }}" class="flex items-center px-4 py-2 text-sm text-aura-text hover:bg-aura-border hover:text-white">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                    Settings
+                                </a>
+                                <div class="border-t border-aura-border"></div>
+                                <a href="{{ url_for('logout') }}" class="flex items-center px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                    </svg>
+                                    Logout
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="flex-1 flex flex-col overflow-y-auto">
+            <div class="max-w-7xl mx-auto p-8 w-full">
+                <!-- Breadcrumb Navigation -->
+                <div class="breadcrumb">
+                    <a href="{{ url_for('view_tasks', project_id=project.id) }}">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                        Back to {{ project.name }}
+                    </a>
+                </div>
+
+                <!-- Header -->
+                <div class="header-card glass-effect rounded-2xl p-8 mb-8">
+                    <div class="flex items-start justify-between mb-6">
+                        <div class="flex items-start gap-4">
+                            <div class="bg-aura-accent/20 p-3 rounded-xl">
+                                <svg class="w-8 h-8 text-aura-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h1 class="text-3xl font-semibold text-white mb-2">Edit Task: {{ task.title }}</h1>
+                                <p class="text-aura-muted">Modify task details and update status</p>
+                                <div class="flex items-center gap-2 mt-3">
+                                    <span class="text-sm text-aura-muted">Current Status:</span>
+                                    {% if task.status == 'To-Do' %}
+                                        <span class="status-badge status-todo">{{ task.status }}</span>
+                                    {% elif task.status == 'In Progress' %}
+                                        <span class="status-badge status-progress">{{ task.status }}</span>
+                                    {% elif task.status == 'To Be Review' %}
+                                        <span class="status-badge status-review">{{ task.status }}</span>
+                                    {% elif task.status == 'Done' %}
+                                        <span class="status-badge status-done">{{ task.status }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <a href="{{ url_for('view_tasks', project_id=project.id) }}" class="nav-icon text-aura-text hover:text-white" title="Back to Project">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Edit Content -->
+                <div class="task-info-grid">
+                    <!-- Task Edit Form -->
+                    <div class="edit-card">
+                        <div class="card-header">
+                            <h2>
+                                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                    <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                                Task Details
+                            </h2>
+                        </div>
+                        <div class="card-content">
+                            <form method="POST" action="{{ url_for('edit_task', task_id=task.id) }}">
+                                <div class="form-group">
+                                    <label for="title">Task Title</label>
+                                    <input type="text" id="title" name="title" class="form-control" value="{{ task.title }}" required placeholder="Enter task title">
+                                </div>
+                                <div class="form-group">
+                                    <label for="description">Description</label>
+                                    <textarea id="description" name="description" class="form-control" rows="4" placeholder="Describe the task objectives and requirements">{{ task.description if task.description is not none else '' }}</textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="status">Status</label>
+                                    <select id="status" name="status" class="form-control">
+                                        <option value="To-Do" {% if task.status == 'To-Do' %}selected{% endif %}>To-Do</option>
+                                        <option value="In Progress" {% if task.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                                        <option value="To Be Review" {% if task.status == 'To Be Review' %}selected{% endif %}>To Be Review</option>
+                                        <option value="Done" {% if task.status == 'Done' %}selected{% endif %}>Done</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="assignee_id">Assignee</label>
+                                    <select id="assignee_id" name="assignee_id" class="form-control">
+                                        <option value="">-- Unassigned --</option>
+                                        {% for user in users %}
+                                            <option value="{{ user.id }}" {% if task.assignee_id == user.id %}selected{% endif %}>{{ user.username }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="start_date">Start Date</label>
+                                    <input type="date" id="start_date" name="start_date" class="form-control" value="{{ task.start_date.strftime('%Y-%m-%d') if task.start_date else '' }}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="due_date">Due Date</label>
+                                    <input type="date" id="due_date" name="due_date" class="form-control" value="{{ task.due_date.strftime('%Y-%m-%d') if task.due_date else '' }}">
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-full">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                        <path d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    Save Changes
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Task Information Panel -->
+                    <div class="edit-card">
+                        <div class="card-header">
+                            <h2>
+                                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                                </svg>
+                                Task Information
+                            </h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="task-meta">
+                                <div class="task-meta-item">
+                                    <span class="task-meta-label">Project</span>
+                                    <span class="task-meta-value">{{ project.name }}</span>
+                                </div>
+                                <div class="task-meta-item">
+                                    <span class="task-meta-label">Created</span>
+                                    <span class="task-meta-value">{{ task.created_at.strftime('%b %d, %Y') if task.created_at else 'Unknown' }}</span>
+                                </div>
+                                {% if task.assignee_id %}
+                                <div class="task-meta-item">
+                                    <span class="task-meta-label">Assigned To</span>
+                                    <span class="task-meta-value">
+                                        {% for user in users %}
+                                            {% if user.id == task.assignee_id %}{{ user.username }}{% endif %}
+                                        {% endfor %}
+                                    </span>
+                                </div>
+                                {% endif %}
+                                {% if task.start_date %}
+                                <div class="task-meta-item">
+                                    <span class="task-meta-label">Start Date</span>
+                                    <span class="task-meta-value">{{ task.start_date.strftime('%b %d, %Y') }}</span>
+                                </div>
+                                {% endif %}
+                                {% if task.due_date %}
+                                <div class="task-meta-item">
+                                    <span class="task-meta-label">Due Date</span>
+                                    <span class="task-meta-value">{{ task.due_date.strftime('%b %d, %Y') }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="space-y-3">
+                                <h3 class="text-lg font-semibold text-white mb-3">Quick Actions</h3>
+                                <a href="{{ url_for('view_tasks', project_id=project.id) }}" class="btn btn-secondary btn-full">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                        <path d="M3 7h5l2 3h11v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"></path>
+                                    </svg>
+                                    View All Tasks
+                                </a>
+                                <a href="{{ url_for('manage_projects') }}" class="btn btn-secondary btn-full">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                        <path d="M3 7h5l2 3h11v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"></path>
+                                    </svg>
+                                    Projects
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile menu toggle
+            const menuToggle = document.getElementById('menuToggle');
+            if (menuToggle) {
+                menuToggle.addEventListener('click', function () {
+                    const sidebar = document.getElementById('sidebar');
+                    sidebar.classList.toggle('hidden');
+                });
+            }
+
+            // User menu dropdown toggle
+            const userMenuToggle = document.getElementById('userMenuToggle');
+            const userMenu = document.getElementById('userMenu');
+            if (userMenuToggle && userMenu) {
+                userMenuToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    userMenu.classList.toggle('hidden');
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!userMenuToggle.contains(e.target) && !userMenu.contains(e.target)) {
+                        userMenu.classList.add('hidden');
+                    }
+                });
+
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        userMenu.classList.add('hidden');
+                    }
+                });
+            }
+
+            // Date validation
+            const startDateInput = document.getElementById('start_date');
+            const dueDateInput = document.getElementById('due_date');
+            
+            if (startDateInput && dueDateInput) {
+                startDateInput.addEventListener('change', function() {
+                    if (this.value && dueDateInput.value && this.value > dueDateInput.value) {
+                        dueDateInput.value = this.value;
+                    }
+                    dueDateInput.setAttribute('min', this.value);
+                });
+
+                dueDateInput.addEventListener('change', function() {
+                    if (startDateInput.value && this.value && this.value < startDateInput.value) {
+                        startDateInput.value = this.value;
+                    }
+                });
+            }
+
+            // Form enhancement
+            const form = document.querySelector('form');
+            const submitButton = document.querySelector('button[type="submit"]');
+            
+            if (form && submitButton) {
+                form.addEventListener('submit', function() {
+                    submitButton.disabled = true;
+                    submitButton.innerHTML = `
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="animate-spin">
+                            <path d="M21 12a9 9 0 11-6.219-8.56"/>
+                        </svg>
+                        Saving...
+                    `;
+                });
+            }
+
+            // Auto-hide flash messages
+            const flashMessages = document.querySelectorAll('.flash-messages li');
+            flashMessages.forEach(function(message) {
+                setTimeout(function() {
+                    message.style.opacity = '0';
+                    message.style.transform = 'translateX(100%)';
+                    setTimeout(function() {
+                        message.remove();
+                    }, 300);
+                }, 5000);
+            });
+        });
+    </script>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul class="flash-messages">
+            {% for category, message in messages %}
+                <li class="{{ category }}">{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+</body>
+</html> 

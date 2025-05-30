@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Overview - Project Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        aura: {
+                            bg: '#0d0e10',
+                            card: '#13141a',
+                            border: '#1f2023',
+                            accent: '#5e6ad2',
+                            purple: '#8b5cf6',
+                            text: '#b4bcd0',
+                            muted: '#7c8794',
+                            darker: '#070707',
+                            lighter: '#1a1a1a'
+                        }
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-effect {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .header-card {
+            background: linear-gradient(135deg,
+                    rgba(19, 20, 26, 0.95) 0%,
+                    rgba(31, 32, 35, 0.8) 100%);
+            border: 1px solid rgba(31, 32, 35, 0.8);
+        }
+
+        .nav-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(31, 32, 35, 0.8);
+            border: 1px solid rgba(94, 106, 210, 0.2);
+            transition: all 0.2s ease;
+            font-size: 12px;
+        }
+
+        .nav-icon:hover {
+            background: rgba(94, 106, 210, 0.1);
+            border-color: rgba(94, 106, 210, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .stat-divider {
+            width: 1px;
+            background: linear-gradient(180deg, transparent, rgba(94, 106, 210, 0.3) 50%, transparent);
+            height: 20px;
+        }
+
+        /* Overview specific styles */
+        .overview-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+            padding: 0;
+            background: transparent;
+        }
+
+        .overview-card {
+            background: linear-gradient(135deg,
+                    rgba(19, 20, 26, 0.9) 0%,
+                    rgba(31, 32, 35, 0.5) 100%);
+            border: 1px solid rgba(31, 32, 35, 0.8);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .overview-card:hover {
+            border-color: rgba(94, 106, 210, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            padding: 1.25rem 1.5rem 1rem;
+            border-bottom: 1px solid rgba(31, 32, 35, 0.8);
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-header h2 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-item {
+            background: rgba(31, 32, 35, 0.5);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(31, 32, 35, 0.8);
+            transition: all 0.2s ease;
+        }
+
+        .stat-item:hover {
+            background: rgba(31, 32, 35, 0.7);
+            border-color: rgba(94, 106, 210, 0.3);
+        }
+
+        .stat-number {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #5e6ad2;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: #7c8794;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .project-list, .task-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .project-item2, .task-item {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(31, 32, 35, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+        }
+
+        .project-item2:hover, .task-item:hover {
+            background: rgba(31, 32, 35, 0.3);
+            border-radius: 6px;
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+
+        .project-item2:last-child, .task-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .project-item2:first-child, .task-item:first-child {
+            padding-top: 0;
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-title {
+            font-weight: 600;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+            display: block;
+            transition: color 0.2s ease;
+        }
+
+        .item-title:hover {
+            color: #5e6ad2;
+        }
+
+        .item-meta {
+            font-size: 0.75rem;
+            color: #7c8794;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .priority-badge {
+            padding: 0.125rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.625rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .priority-high {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .priority-medium {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .priority-low {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.6875rem;
+            font-weight: 500;
+            background: rgba(94, 106, 210, 0.2);
+            color: #5e6ad2;
+            border: 1px solid rgba(94, 106, 210, 0.3);
+        }
+
+        .activity-item {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(31, 32, 35, 0.8);
+            display: flex;
+            gap: 0.75rem;
+            transition: all 0.2s ease;
+        }
+
+        .activity-item:hover {
+            background: rgba(31, 32, 35, 0.3);
+            border-radius: 6px;
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .activity-item:first-child {
+            padding-top: 0;
+        }
+
+        .activity-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(94, 106, 210, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #5e6ad2;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+            border: 1px solid rgba(94, 106, 210, 0.3);
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-text {
+            font-size: 0.875rem;
+            color: #b4bcd0;
+            margin: 0 0 0.25rem 0;
+        }
+
+        .activity-time {
+            font-size: 0.75rem;
+            color: #7c8794;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #7c8794;
+            font-size: 0.875rem;
+            padding: 1.25rem;
+            font-style: italic;
+        }
+
+        .empty-state svg {
+            margin: 0 auto 0.75rem;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+            color: #b4bcd0;
+            font-style: normal;
+        }
+
+        .empty-state small {
+            font-size: 0.875rem;
+            opacity: 0.8;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .quick-action-btn {
+            background: rgba(94, 106, 210, 0.1);
+            color: #5e6ad2;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(94, 106, 210, 0.2);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        .quick-action-btn:hover {
+            background: rgba(94, 106, 210, 0.2);
+            border-color: rgba(94, 106, 210, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .progress-overview {
+            background: rgba(31, 32, 35, 0.5);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(31, 32, 35, 0.8);
+        }
+
+        .progress-overview h4 {
+            margin: 0 0 0.75rem 0;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .progress-bar-overview {
+            height: 8px;
+            background: rgba(31, 32, 35, 0.8);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #5e6ad2, #8b5cf6);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: var(--progress-width, 0%);
+        }
+
+        .progress-text {
+            font-size: 0.75rem;
+            color: #7c8794;
+            text-align: right;
+        }
+
+        /* Flash Messages */
+        .flash-messages {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            z-index: 50;
+        }
+
+        .flash-messages li {
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            border: 1px solid transparent;
+            background: rgba(19, 20, 26, 0.95);
+            color: #b4bcd0;
+            border-color: rgba(31, 32, 35, 0.8);
+        }
+
+        .flash-messages .success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .flash-messages .danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .flash-messages .warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+            border-color: rgba(245, 158, 11, 0.2);
+        }
+
+        .flash-messages .info {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+            border-color: rgba(59, 130, 246, 0.2);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .overview-dashboard {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .quick-actions {
+                flex-direction: column;
+            }
+
+            .quick-action-btn {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body class="bg-aura-bg text-aura-text font-inter min-h-screen">
+
+    <div class="flex flex-col md:flex-row h-screen">
+        <!-- Mobile header -->
+        <header class="md:hidden bg-darker p-4 flex justify-between items-center border-b border-lighter">
+            <div class="flex items-center space-x-2">
+                <div class="h-6 w-6 rounded-md bg-accent"></div>
+                <span class="font-medium">Dashboard</span>
+            </div>
+            <button id="menuToggle" class="text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16">
+                    </path>
+                </svg>
+            </button>
+        </header>
+
+        <!-- Sidebar -->
+        <div id="sidebar"
+            class="hidden md:block w-full md:w-64 header-card flex-shrink-0 flex flex-col h-screen md:h-auto overflow-y-auto">
+            <div class="p-4 md:block hidden">
+                <div class="flex items-center space-x-2">
+                    <div class="h-6 w-6 rounded-md bg-accent"></div>
+                    <span class="font-medium">Workspace</span>
+                </div>
+            </div>
+
+            <nav class="flex-1 py-4">
+                <div class="px-3 mb-2 text-xs font-medium text-muted">WORKSPACE</div>
+                <a href="{{ url_for('overview_view') }}"
+                    class="flex items-center px-3 py-2 text-sm text-white bg-aura-purple rounded-md mx-2">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
+                        </path>
+                    </svg>
+                    Home
+                </a>
+                <a href="{{ url_for('index') }}"
+                    class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01">
+                        </path>
+                    </svg>
+                    Issues
+                </a>
+                <a href="{{ url_for('manage_projects') }}"
+                    class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 7h5l2 3h11v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" />
+                    </svg>
+                    Projects
+                </a>
+                <a href="{{ url_for('calendar_view') }}"
+                    class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                        </path>
+                    </svg>
+                    Analytics
+                </a>
+                <a href="{{ url_for('timeline_view') }}"
+                    class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z">
+                        </path>
+                    </svg>
+                    Timeline
+                </a>
+
+                <div class="px-3 mt-6 mb-2 text-xs font-medium text-muted">TEAMS</div>
+                <a href="#"
+                    class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2">
+                    <div class="w-4 h-4 rounded-sm bg-purple-500 mr-3"></div>
+                    Design
+                </a>
+                <a href="#"
+                    class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <div class="w-4 h-4 rounded-sm bg-blue-500 mr-3"></div>
+                    Engineering
+                </a>
+                <a href="#"
+                    class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <div class="w-4 h-4 rounded-sm bg-green-500 mr-3"></div>
+                    Product
+                </a>
+            </nav>
+
+            <div class="p-4 border-t border-aura-border">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 rounded-full bg-accent flex items-center justify-center">
+                            <span class="text-sm font-medium">{{ current_user.username[0]|upper if current_user.username else 'U' }}</span>
+                        </div>
+                        <div class="ml-2">
+                            <div class="text-sm font-medium">{{ current_user.username if current_user.username else 'User' }}</div>
+                            <div class="text-xs text-muted">My Workspace</div>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <button id="userMenuToggle" class="nav-icon text-aura-text hover:text-white" title="User menu">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div id="userMenu" class="hidden absolute bottom-full right-0 mb-2 w-48 bg-aura-card border border-aura-border rounded-lg shadow-lg">
+                            <div class="py-1">
+                                <a href="{{ url_for('user_settings') }}" class="flex items-center px-4 py-2 text-sm text-aura-text hover:bg-aura-border hover:text-white">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    Settings
+                                </a>
+                                <div class="border-t border-aura-border"></div>
+                                <a href="{{ url_for('logout') }}" class="flex items-center px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                    </svg>
+                                    Logout
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="flex-1 flex flex-col overflow-y-auto">
+            <!-- Dashboard Header -->
+            <div class="max-w-7xl mx-auto p-8 w-full">
+                <div class="header-card glass-effect rounded-2xl p-8 mb-8">
+                    <!-- Dashboard Header Content -->
+                    <div class="flex items-start justify-between mb-6">
+                        <div>
+                            <h1 class="text-3xl font-semibold text-white mb-1 flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-aura-accent/20 flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-aura-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                    </svg>
+                                </div>
+                                Project Dashboard
+                            </h1>
+                            <p class="text-aura-muted">Welcome back! Here's an overview of your projects and tasks.</p>
+                        </div>
+
+                        <!-- Navigation Icons -->
+                        <div class="flex items-center gap-3">
+                            <a href="{{ url_for('manage_projects') }}" class="nav-icon text-aura-text hover:text-white" title="Projects">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h5l2 3h11v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" />
+                                </svg>
+                            </a>
+                            <a href="{{ url_for('timeline_view') }}" class="nav-icon text-aura-text hover:text-white" title="Timeline">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </a>
+                            <a href="{{ url_for('calendar_view') }}" class="nav-icon text-aura-text hover:text-white" title="Calendar">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </a>
+                            <a href="{{ url_for('index') }}" class="nav-icon text-aura-text hover:text-white" title="Issues">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Stats Row -->
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-8">
+                            <!-- Dashboard Stats -->
+                            <div class="text-center">
+                                <div class="text-2xl font-semibold text-white mb-1">{{ user_projects|length if user_projects else 0 }}</div>
+                                <div class="text-xs text-aura-muted uppercase tracking-wider" style="font-size: 10px;">Active Projects</div>
+                            </div>
+                            <div class="stat-divider"></div>
+
+                            <div class="text-center">
+                                <div class="text-2xl font-semibold text-white mb-1">{{ task_stats['Total'] if task_stats else 0 }}</div>
+                                <div class="text-xs text-aura-muted uppercase tracking-wider" style="font-size: 10px;">Total Tasks</div>
+                            </div>
+                            <div class="stat-divider"></div>
+
+                            <div class="text-center">
+                                <div class="text-2xl font-semibold text-white mb-1">{{ task_stats['Done'] if task_stats else 0 }}</div>
+                                <div class="text-xs text-aura-muted uppercase tracking-wider" style="font-size: 10px;">Completed</div>
+                            </div>
+                            <div class="stat-divider"></div>
+
+                            <div class="text-center">
+                                {% if task_stats and task_stats['Total'] > 0 %}
+                                    {% set progress_percentage = (task_stats['Done'] / task_stats['Total'] * 100)|round %}
+                                {% else %}
+                                    {% set progress_percentage = 0 %}
+                                {% endif %}
+                                <div class="text-2xl font-semibold text-aura-accent mb-1">{{ progress_percentage }}%</div>
+                                <div class="text-xs text-aura-muted uppercase tracking-wider" style="font-size: 10px;">Progress</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="flex items-center gap-3 mt-6 pt-6 border-t border-aura-border">
+                        <span class="text-xs text-aura-muted">Quick Actions:</span>
+                        <a href="{{ url_for('manage_projects') }}" class="quick-action-btn">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                <path d="M12 2v20m8-10H4"/>
+                            </svg>
+                            New Project
+                        </a>
+                        {% if user_projects %}
+                        <a href="{{ url_for('add_task', project_id=user_projects[0].id) }}" class="quick-action-btn">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                <path d="M12 2v20m8-10H4"/>
+                            </svg>
+                            Add Task
+                        </a>
+                        {% endif %}
+                        <a href="{{ url_for('calendar_view') }}" class="quick-action-btn">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                <rect x="3" y="4" width="18" height="18" rx="2"/>
+                                <path d="M16 2v4M8 2v4M3 10h18"/>
+                            </svg>
+                            View Calendar
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Overview Dashboard -->
+                <div class="overview-dashboard">
+                    <!-- Project Summary Card -->
+                    <div class="overview-card">
+                        <div class="card-header">
+                            <h2>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M1.5 0A1.5 1.5 0 0 0 0 1.5v13A1.5 1.5 0 0 0 1.5 16h13a1.5 1.5 0 0 0 1.5-1.5v-13A1.5 1.5 0 0 0 14.5 0h-13zM1 1.5a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 .5.5v13a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-13z"/>
+                                </svg>
+                                Project Summary
+                            </h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <span class="stat-number">{{ user_projects|length if user_projects else 0 }}</span>
+                                    <span class="stat-label">Active Projects</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-number">{{ task_stats['Total'] if task_stats else 0 }}</span>
+                                    <span class="stat-label">Total Tasks</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-number">{{ all_users|length if all_users else 1 }}</span>
+                                    <span class="stat-label">Team Members</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-number">{{ task_stats['Done'] if task_stats else 0 }}</span>
+                                    <span class="stat-label">Completed</span>
+                                </div>
+                            </div>
+                            {% if task_stats and task_stats['Total'] > 0 %}
+                                {% set progress_percentage = (task_stats['Done'] / task_stats['Total'] * 100)|round %}
+                                <div class="progress-overview" style="--progress-width: {{ progress_percentage }}%;">
+                                    <h4>Overall Progress</h4>
+                                    <div class="progress-bar-overview">
+                                        <div class="progress-fill"></div>
+                                    </div>
+                                    <div class="progress-text">{{ progress_percentage }}% Complete</div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Active Projects Card -->
+                    <div class="overview-card">
+                        <div class="card-header">
+                            <h2>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M3 7v3h3v-3H3z"/>
+                                    <path d="M1.5 0A1.5 1.5 0 0 0 0 1.5v13A1.5 1.5 0 0 0 1.5 16h13a1.5 1.5 0 0 0 1.5-1.5v-13A1.5 1.5 0 0 0 14.5 0h-13z"/>
+                                </svg>
+                                Active Projects
+                            </h2>
+                        </div>
+                        <div class="card-content">
+                            {% if user_projects %}
+                                <ul class="project-list">
+                                    {% for project in user_projects[:4] %}
+                                        <li class="project-item2">
+                                            <div class="item-info">
+                                                <a href="{{ url_for('view_tasks', project_id=project.id) }}" class="item-title">{{ project.name }}</a>
+                                                <div class="item-meta">
+                                                    <span>{{ project.tasks|length if project.tasks else 0 }} tasks</span>
+                                                    {% if project.end_date %}
+                                                        <span>Due {{ project.end_date.strftime('%b %d') }}</span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="status-badge">Active</div>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                                {% if user_projects|length > 4 %}
+                                    <div style="text-align: center; margin-top: 1rem;">
+                                        <a href="{{ url_for('manage_projects') }}" class="quick-action-btn">View All Projects</a>
+                                    </div>
+                                {% endif %}
+                            {% else %}
+                                <div class="empty-state">
+                                    <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                        <path d="M3 7h5l2 3h11v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/>
+                                    </svg>
+                                    <p>No active projects</p>
+                                    <small>Create your first project to get started</small>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Task Status Overview -->
+                    <div class="overview-card">
+                        <div class="card-header">
+                            <h2>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.061L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>
+                                </svg>
+                                Task Overview
+                            </h2>
+                        </div>
+                        <div class="card-content">
+                            {% if task_stats and task_stats['Total'] > 0 %}
+                                <div class="stats-grid">
+                                    <div class="stat-item">
+                                        <span class="stat-number" style="color: #6b7280;">{{ task_stats['To-Do'] if task_stats['To-Do'] else 0 }}</span>
+                                        <span class="stat-label">To-Do</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-number" style="color: #f59e0b;">{{ task_stats['In Progress'] if task_stats['In Progress'] else 0 }}</span>
+                                        <span class="stat-label">In Progress</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-number" style="color: #8b5cf6;">{{ task_stats['To Be Review'] if task_stats['To Be Review'] else 0 }}</span>
+                                        <span class="stat-label">Review</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-number" style="color: #22c55e;">{{ task_stats['Done'] if task_stats['Done'] else 0 }}</span>
+                                        <span class="stat-label">Done</span>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="empty-state">
+                                    <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                        <polyline points="20 6 9 17 4 12"/>
+                                    </svg>
+                                    <p>No tasks to display</p>
+                                    <small>Add tasks to your projects to see progress</small>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Upcoming Deadlines -->
+                    <div class="overview-card">
+                        <div class="card-header">
+                            <h2>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                    <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5z"/>
+                                </svg>
+                                Upcoming Deadlines
+                            </h2>
+                        </div>
+                        <div class="card-content">
+                            {% if upcoming_deadlines %}
+                                <ul class="task-list">
+                                    {% for task in upcoming_deadlines %}
+                                        <li class="task-item">
+                                            <div class="item-info">
+                                                <a href="{{ url_for('edit_task', task_id=task.id) }}" class="item-title">{{ task.title }}</a>
+                                                <div class="item-meta">
+                                                    <span>{{ task.project.name }}</span>
+                                                    <span>Due {{ task.due_date.strftime('%b %d') }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="priority-badge priority-high">High</div>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <div class="empty-state">
+                                    <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                        <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5z"/>
+                                    </svg>
+                                    <p>No upcoming deadlines</p>
+                                    <small>All caught up! No urgent tasks due soon</small>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="overview-card">
+                        <div class="card-header">
+                            <h2>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+                                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
+                                </svg>
+                                Recent Activity
+                            </h2>
+                        </div>
+                        <div class="card-content">
+                            {% if recently_completed_tasks %}
+                                {% for task in recently_completed_tasks[:4] %}
+                                    <div class="activity-item">
+                                        <div class="activity-avatar">{{ current_user.username[0]|upper }}</div>
+                                        <div class="activity-content">
+                                            <div class="activity-text">
+                                                Completed <strong>{{ task.title }}</strong> in {{ task.project.name }}
+                                            </div>
+                                            <div class="activity-time">{{ task.updated_at.strftime('%b %d, %H:%M') if task.updated_at else 'Recently' }}</div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="empty-state">
+                                    <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                        <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+                                        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
+                                    </svg>
+                                    <p>No recent activity</p>
+                                    <small>Complete some tasks to see activity here</small>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="overview-card">
+                        <div class="card-header">
+                            <h2>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                                </svg>
+                                Quick Actions
+                            </h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="quick-actions">
+                                <a href="{{ url_for('manage_projects') }}" class="quick-action-btn">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                        <path d="M12 2v20m8-10H4"/>
+                                    </svg>
+                                    New Project
+                                </a>
+                                {% if user_projects %}
+                                    <a href="{{ url_for('add_task', project_id=user_projects[0].id) }}" class="quick-action-btn">
+                                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                            <path d="M12 2v20m8-10H4"/>
+                                        </svg>
+                                        Add Task
+                                    </a>
+                                {% endif %}
+                                <a href="{{ url_for('calendar_view') }}" class="quick-action-btn">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                        <rect x="3" y="4" width="18" height="18" rx="2"/>
+                                        <path d="M16 2v4M8 2v4M3 10h18"/>
+                                    </svg>
+                                    View Calendar
+                                </a>
+                                <a href="{{ url_for('user_settings') }}" class="quick-action-btn">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                        <circle cx="12" cy="12" r="3"/>
+                                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.09a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                                    </svg>
+                                    Settings
+                                </a>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-hide flash messages
+            const flashMessages = document.querySelectorAll('.flash-messages li');
+            flashMessages.forEach(function(message) {
+                setTimeout(function() {
+                    message.style.opacity = '0';
+                    message.style.transform = 'translateX(100%)';
+                    setTimeout(function() {
+                        message.remove();
+                    }, 300);
+                }, 5000);
+            });
+
+            // Add hover effects to overview cards
+            const overviewCards = document.querySelectorAll('.overview-card');
+            overviewCards.forEach(function(card) {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-4px)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(-2px)';
+                });
+            });
+
+            // Animate stats on load
+            const statNumbers = document.querySelectorAll('.stat-number');
+            statNumbers.forEach(function(stat) {
+                const finalValue = parseInt(stat.textContent);
+                if (finalValue > 0) {
+                    let currentValue = 0;
+                    const increment = Math.ceil(finalValue / 20);
+                    
+                    const timer = setInterval(function() {
+                        currentValue += increment;
+                        if (currentValue >= finalValue) {
+                            currentValue = finalValue;
+                            clearInterval(timer);
+                        }
+                        stat.textContent = currentValue;
+                    }, 50);
+                }
+            });
+
+            // Mobile menu toggle
+            document.getElementById('menuToggle').addEventListener('click', function () {
+                const sidebar = document.getElementById('sidebar');
+                sidebar.classList.toggle('hidden');
+            });
+
+            // User menu dropdown toggle
+            const userMenuToggle = document.getElementById('userMenuToggle');
+            const userMenu = document.getElementById('userMenu');
+            if (userMenuToggle && userMenu) {
+                userMenuToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    userMenu.classList.toggle('hidden');
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!userMenuToggle.contains(e.target) && !userMenu.contains(e.target)) {
+                        userMenu.classList.add('hidden');
+                    }
+                });
+
+                // Close dropdown when pressing Escape
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        userMenu.classList.add('hidden');
+                    }
+                });
+            }
+
+            // Enhanced button interactions
+            const buttons = document.querySelectorAll('.quick-action-btn, .nav-icon');
+            buttons.forEach(function (btn) {
+                btn.addEventListener('mouseenter', function () {
+                    this.style.transform = 'translateY(-1px)';
+                });
+
+                btn.addEventListener('mouseleave', function () {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+
+            // Animate progress bar
+            const progressBar = document.querySelector('.progress-fill');
+            if (progressBar) {
+                const targetWidth = progressBar.style.getPropertyValue('--progress-width') || getComputedStyle(progressBar).getPropertyValue('--progress-width');
+                progressBar.style.width = '0%';
+                setTimeout(function () {
+                    progressBar.style.width = targetWidth;
+                }, 500);
+            }
+        });
+    </script>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul class="flash-messages">
+            {% for category, message in messages %}
+                <li class="{{ category }}">{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+</body>
+</html> 

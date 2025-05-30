@@ -1,0 +1,75 @@
+<aside class="sidebar2">
+    <section class="projects-section">
+        <h2>Projects</h2>
+        {% set project_colors = ['#6366f1', '#f59e42', '#10b981', '#f43f5e', '#3b82f6', '#a21caf', '#fbbf24', '#14b8a6'] %}
+        {% set project_color_map = {} %}
+        {% for project in user_projects if not project.archived %}
+            {% set _ = project_color_map.update({project.id: project_colors[loop.index0 % project_colors|length]}) %}
+        {% endfor %}
+        {% if user_projects|selectattr('archived', 'equalto', False)|list %}
+            <ul class="projects-list" data-count="{{ user_projects|selectattr('archived', 'equalto', False)|list|length }}">
+                {% for project in user_projects if not project.archived %}
+                    {% set color = project_color_map[project.id] %}
+                    <li class="project-item">
+                        <div class="project-card">
+                            <a href="{{ url_for('view_tasks', project_id=project.id) }}" class="project-link">
+                                <div class="project-header" style="--project-color: {{ color }};">
+                                    <div class="project-info">
+                                        <div class="project-icon">
+                                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                                <path d="M3 7h5l2 3h11v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/>
+                                            </svg>
+                                        </div>
+                                        <span class="project-name">{{ project.name }}</span>
+                                    </div>
+                                    <span class="project-menu-btn">⋮</span>
+                                </div>
+                                <div class="project-content">
+                                    <p class="project-description">{{ project.description if project.description else 'No description available.' }}</p>
+                                    <div class="project-footer">
+                                        <div class="project-stats">
+                                            <span>{{ project.tasks|length if project.tasks else 0 }} tasks</span>
+                                        </div>
+                                        <span title="Project owner" class="project-owner-avatar" style="--project-color: {{ color }};">{{ project.owner_user.username[0]|upper }}</span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+            {% if user_projects|selectattr('archived', 'equalto', False)|list|length > 3 %}
+                <a href="{{ url_for('manage_projects') }}" class="view-all-projects">View All Projects ({{ user_projects|selectattr('archived', 'equalto', False)|list|length }})</a>
+            {% endif %}
+        {% else %}
+            <p class="empty-state">No projects yet.</p>
+        {% endif %}
+        <a href="{{ url_for('manage_projects') }}" class="add-project-btn-sidebar">Add Project ＋</a>
+    </section>
+    <section class="team-section">
+        <h2>Team Members</h2>
+        {% if all_users %}
+            <ul class="team-list">
+                {% for user_profile in all_users %}
+                    <li class="team-member-card">
+                        <div class="team-member">
+                            <div class="team-member-info">
+                                <span class="team-member-avatar">{{ user_profile.username[0]|upper }}</span>
+                                <div class="team-member-details">
+                                    <div class="team-member-name">{{ user_profile.username }}</div>
+                                    <div class="team-member-status status-offline">
+                                        <span class="status-dot"></span>
+                                        <span>Offline</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="team-member-menu">⋮</span>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="empty-state">No users found.</p>
+        {% endif %}
+    </section>
+</aside>

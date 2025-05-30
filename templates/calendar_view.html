@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar View - Project Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        aura: {
+                            bg: '#0d0e10',
+                            card: '#13141a',
+                            border: '#1f2023',
+                            accent: '#5e6ad2',
+                            purple: '#8b5cf6',
+                            text: '#b4bcd0',
+                            muted: '#7c8794',
+                            darker: '#070707',
+                            lighter: '#1a1a1a'
+                        }
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FullCalendar JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.15/index.global.min.js"></script>
+    <style>
+        .glass-effect {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .header-card {
+            background: linear-gradient(135deg,
+                    rgba(19, 20, 26, 0.95) 0%,
+                    rgba(31, 32, 35, 0.8) 100%);
+            border: 1px solid rgba(31, 32, 35, 0.8);
+        }
+
+        .nav-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(31, 32, 35, 0.8);
+            border: 1px solid rgba(94, 106, 210, 0.2);
+            transition: all 0.2s ease;
+            font-size: 12px;
+        }
+
+        .nav-icon:hover {
+            background: rgba(94, 106, 210, 0.1);
+            border-color: rgba(94, 106, 210, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .stat-divider {
+            width: 1px;
+            background: linear-gradient(180deg, transparent, rgba(94, 106, 210, 0.3) 50%, transparent);
+            height: 20px;
+        }
+
+        /* Calendar Background */
+        .calendar-background {
+            background: #0d0e10;
+        }
+
+        /* Main Calendar Container */
+        .calendar-container {
+            background: linear-gradient(135deg,
+                    rgba(19, 20, 26, 0.9) 0%,
+                    rgba(31, 32, 35, 0.5) 100%);
+            border: 1px solid rgba(31, 32, 35, 0.8);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Stats Cards */
+        .stat-card {
+            background: linear-gradient(135deg,
+                    rgba(19, 20, 26, 0.9) 0%,
+                    rgba(31, 32, 35, 0.5) 100%);
+            border: 1px solid rgba(31, 32, 35, 0.8);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(94, 106, 210, 0.3);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-number {
+            background: linear-gradient(135deg, #5e6ad2, #8b5cf6);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            font-weight: 700;
+        }
+
+        /* Calendar Controls */
+        .calendar-controls {
+            background: linear-gradient(135deg,
+                    rgba(19, 20, 26, 0.9) 0%,
+                    rgba(31, 32, 35, 0.5) 100%);
+            border: 1px solid rgba(31, 32, 35, 0.8);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .control-btn {
+            background: rgba(31, 32, 35, 0.8);
+            color: #b4bcd0;
+            border: 1px solid rgba(31, 32, 35, 0.8);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .control-btn:hover {
+            background: rgba(31, 32, 35, 1);
+            border-color: rgba(94, 106, 210, 0.3);
+            color: #ffffff;
+            transform: translateY(-1px);
+        }
+
+        .control-btn.active {
+            background: linear-gradient(135deg, #5e6ad2, #8b5cf6);
+            color: white;
+            border-color: #5e6ad2;
+        }
+
+        /* Status Legend */
+        .status-legend {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: #b4bcd0;
+            padding: 0.25rem 0.75rem;
+            background: rgba(31, 32, 35, 0.5);
+            border-radius: 6px;
+            border: 1px solid rgba(31, 32, 35, 0.8);
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .legend-color.to-do { background: #6b7280; }
+        .legend-color.in-progress { background: #3b82f6; }
+        .legend-color.to-be-review { background: #f59e0b; }
+        .legend-color.done { background: #10b981; }
+
+        /* Calendar Wrapper */
+        .calendar-wrapper {
+            background: rgba(13, 14, 16, 0.8);
+            border: 1px solid rgba(31, 32, 35, 0.8);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        /* Enhanced FullCalendar Styling - Remove white lines */
+        .fc {
+            font-family: 'Inter', sans-serif !important;
+            background: transparent !important;
+        }
+
+        .fc .fc-toolbar {
+            background: linear-gradient(135deg,
+                    rgba(19, 20, 26, 0.95) 0%,
+                    rgba(31, 32, 35, 0.8) 100%) !important;
+            padding: 1.5rem !important;
+            border-bottom: 1px solid rgba(31, 32, 35, 0.8) !important;
+            border-radius: 12px 12px 0 0 !important;
+        }
+
+        .fc .fc-toolbar-title {
+            font-size: 1.5rem !important;
+            font-weight: 600 !important;
+            color: #ffffff !important;
+        }
+
+        .fc .fc-button {
+            background: linear-gradient(135deg, #5e6ad2, #8b5cf6) !important;
+            border: 1px solid rgba(31, 32, 35, 0.8) !important;
+            color: white !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            padding: 0.5rem 1rem !important;
+            transition: all 0.2s ease !important;
+            font-size: 0.875rem !important;
+        }
+
+        .fc .fc-button:hover {
+            background: linear-gradient(135deg, #4c51bf, #7c3aed) !important;
+            border-color: rgba(94, 106, 210, 0.3) !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 6px 20px rgba(94, 106, 210, 0.3) !important;
+        }
+
+        .fc .fc-button:disabled {
+            background: rgba(107, 114, 128, 0.3) !important;
+            border-color: rgba(107, 114, 128, 0.3) !important;
+            opacity: 0.6 !important;
+            transform: none !important;
+        }
+
+        .fc .fc-button-active {
+            background: linear-gradient(135deg, #4c51bf, #7c3aed) !important;
+            border-color: rgba(31, 32, 35, 0.8) !important;
+            box-shadow: 0 4px 12px rgba(94, 106, 210, 0.4) !important;
+        }
+
+        .fc .fc-today-button {
+            background: linear-gradient(135deg, #8b5cf6, #a855f7) !important;
+            border-color: rgba(31, 32, 35, 0.8) !important;
+        }
+
+        .fc .fc-today-button:hover {
+            background: linear-gradient(135deg, #7c3aed, #9333ea) !important;
+            border-color: rgba(94, 106, 210, 0.3) !important;
+        }
+
+        /* Calendar Grid Styling - Remove white lines */
+        .fc .fc-scrollgrid {
+            border-color: rgba(31, 32, 35, 0.8) !important;
+            background: rgba(13, 14, 16, 0.8) !important;
+        }
+
+        .fc .fc-col-header {
+            background: linear-gradient(135deg,
+                    rgba(19, 20, 26, 0.9) 0%,
+                    rgba(31, 32, 35, 0.7) 100%) !important;
+            border-color: rgba(31, 32, 35, 0.8) !important;
+        }
+
+        .fc .fc-col-header-cell {
+            font-weight: 600 !important;
+            color: #b4bcd0 !important;
+            padding: 0.75rem 0.5rem !important;
+            font-size: 0.875rem !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+            border-color: rgba(31, 32, 35, 0.6) !important;
+        }
+
+        .fc .fc-daygrid-day {
+            background: rgba(13, 14, 16, 0.4) !important;
+            border-color: rgba(31, 32, 35, 0.6) !important;
+            transition: all 0.2s ease !important;
+        }
+
+        .fc .fc-daygrid-day:hover {
+            background: rgba(31, 32, 35, 0.6) !important;
+        }
+
+        .fc .fc-daygrid-day-number {
+            color: #b4bcd0 !important;
+            font-weight: 500 !important;
+            padding: 0.5rem !important;
+            font-size: 0.875rem !important;
+        }
+
+        .fc .fc-day-today {
+            background: rgba(94, 106, 210, 0.1) !important;
+            border-color: rgba(94, 106, 210, 0.3) !important;
+        }
+
+        .fc .fc-day-today .fc-daygrid-day-number {
+            background: linear-gradient(135deg, #5e6ad2, #8b5cf6) !important;
+            color: white !important;
+            border-radius: 50% !important;
+            width: 28px !important;
+            height: 28px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-weight: 600 !important;
+        }
+
+        /* Remove all white borders from calendar grid */
+        .fc-theme-standard td, .fc-theme-standard th {
+            border-color: rgba(31, 32, 35, 0.6) !important;
+        }
+
+        .fc-scrollgrid-section > * {
+            border-color: rgba(31, 32, 35, 0.6) !important;
+        }
+
+        /* Enhanced Event Styling */
+        .fc-event {
+            border-radius: 6px !important;
+            border: none !important;
+            font-weight: 500 !important;
+            font-size: 0.75rem !important;
+            padding: 0.25rem 0.5rem !important;
+            margin-bottom: 2px !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+            transition: all 0.2s ease !important;
+            cursor: pointer !important;
+        }
+
+        .fc-event:hover {
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+            z-index: 10 !important;
+        }
+
+        .fc-event.status-to-do {
+            background: linear-gradient(135deg, #6b7280, #4b5563) !important;
+            color: white !important;
+        }
+
+        .fc-event.status-in-progress {
+            background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+            color: white !important;
+        }
+
+        .fc-event.status-to-be-review {
+            background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+            color: white !important;
+        }
+
+        .fc-event.status-done {
+            background: linear-gradient(135deg, #10b981, #059669) !important;
+            color: white !important;
+        }
+
+        /* List view styling */
+        .fc .fc-list {
+            border-color: rgba(31, 32, 35, 0.8) !important;
+            background: rgba(13, 14, 16, 0.8) !important;
+        }
+
+        .fc .fc-list-day-cushion {
+            background: rgba(31, 32, 35, 0.8) !important;
+            color: #b4bcd0 !important;
+            font-weight: 600 !important;
+            padding: 0.75rem 1rem !important;
+        }
+
+        .fc .fc-list-event {
+            border-color: rgba(31, 32, 35, 0.6) !important;
+            background: rgba(13, 14, 16, 0.4) !important;
+        }
+
+        .fc .fc-list-event:hover {
+            background: rgba(31, 32, 35, 0.6) !important;
+        }
+
+        /* Week/Day view styling */
+        .fc .fc-timegrid-slot {
+            border-color: rgba(31, 32, 35, 0.6) !important;
+        }
+
+        .fc .fc-timegrid-axis {
+            color: #7c8794 !important;
+            font-size: 0.75rem !important;
+            background: rgba(19, 20, 26, 0.8) !important;
+        }
+
+        /* Animation for calendar loading */
+        .calendar-wrapper {
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Calendar Icon Animation */
+        .calendar-icon {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-5px) rotate(3deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .calendar-container {
+                margin: 1rem;
+                padding: 1rem;
+            }
+            
+            .calendar-controls {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .status-legend {
+                justify-content: center;
+                gap: 0.5rem;
+            }
+            
+            .legend-item {
+                font-size: 0.75rem;
+                padding: 0.25rem 0.5rem;
+            }
+
+            .fc .fc-toolbar {
+                flex-direction: column !important;
+                gap: 1rem !important;
+            }
+
+            .fc .fc-toolbar-chunk {
+                display: flex !important;
+                justify-content: center !important;
+                flex-wrap: wrap !important;
+                gap: 0.5rem !important;
+            }
+        }
+
+        /* Spinning animation for refresh button */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .spin {
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body class="bg-aura-bg text-aura-text font-inter min-h-screen">
+
+    <div class="flex flex-col md:flex-row h-screen">
+        <!-- Mobile header -->
+        <header class="md:hidden bg-darker p-4 flex justify-between items-center border-b border-lighter">
+            <div class="flex items-center space-x-2">
+                <div class="h-6 w-6 rounded-md bg-accent"></div>
+                <span class="font-medium">Calendar</span>
+            </div>
+            <button id="menuToggle" class="text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16">
+                    </path>
+                </svg>
+            </button>
+        </header>
+
+        <!-- Sidebar -->
+        <div id="sidebar"
+            class="hidden md:block w-full md:w-64 header-card flex-shrink-0 flex flex-col h-screen md:h-auto overflow-y-auto">
+            <div class="p-4 md:block hidden">
+                <div class="flex items-center space-x-2">
+                    <div class="h-6 w-6 rounded-md bg-accent"></div>
+                    <span class="font-medium">Workspace</span>
+                </div>
+            </div>
+
+            <nav class="flex-1 py-4">
+                <div class="px-3 mb-2 text-xs font-medium text-muted">WORKSPACE</div>
+                <a href="{{ url_for('overview_view') }}"
+                    class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
+                        </path>
+                    </svg>
+                    Home
+                </a>
+                <a href="{{ url_for('index') }}"
+                    class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01">
+                        </path>
+                    </svg>
+                    Issues
+                </a>
+                <a href="{{ url_for('manage_projects') }}"
+                    class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 7h5l2 3h11v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" />
+                    </svg>
+                    Projects
+                </a>
+                <a href="{{ url_for('calendar_view') }}"
+                    class="flex items-center px-3 py-2 text-sm text-white bg-aura-purple rounded-md mx-2 mt-1">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                        </path>
+                    </svg>
+                    Analytics
+                </a>
+                <a href="{{ url_for('timeline_view') }}"
+                    class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z">
+                        </path>
+                    </svg>
+                    Timeline
+                </a>
+
+                <div class="px-3 mt-6 mb-2 text-xs font-medium text-muted">TEAMS</div>
+                <a href="#"
+                    class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2">
+                    <div class="w-4 h-4 rounded-sm bg-purple-500 mr-3"></div>
+                    Design
+                </a>
+                <a href="#"
+                    class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <div class="w-4 h-4 rounded-sm bg-blue-500 mr-3"></div>
+                    Engineering
+                </a>
+                <a href="#"
+                    class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <div class="w-4 h-4 rounded-sm bg-green-500 mr-3"></div>
+                    Product
+                </a>
+            </nav>
+
+            <div class="p-4 border-t border-aura-border">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 rounded-full bg-accent flex items-center justify-center">
+                            <span class="text-sm font-medium">{{ current_user.username[0]|upper if current_user.username else 'U' }}</span>
+                        </div>
+                        <div class="ml-2">
+                            <div class="text-sm font-medium">{{ current_user.username if current_user.username else 'User' }}</div>
+                            <div class="text-xs text-muted">My Workspace</div>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <button id="userMenuToggle" class="nav-icon text-aura-text hover:text-white" title="User menu">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div id="userMenu" class="hidden absolute bottom-full right-0 mb-2 w-48 bg-aura-card border border-aura-border rounded-lg shadow-lg">
+                            <div class="py-1">
+                                <a href="{{ url_for('user_settings') }}" class="flex items-center px-4 py-2 text-sm text-aura-text hover:bg-aura-border hover:text-white">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    Settings
+                                </a>
+                                <div class="border-t border-aura-border"></div>
+                                <a href="{{ url_for('logout') }}" class="flex items-center px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                    </svg>
+                                    Logout
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="flex-1 flex flex-col overflow-y-auto">
+            <!-- Dashboard Header -->
+            <div class="max-w-7xl mx-auto p-8 w-full">
+                <div class="header-card glass-effect rounded-2xl p-8 mb-8">
+                    <div class="flex items-start justify-between mb-6">
+                        <div class="flex items-start gap-4">
+                            <div class="bg-aura-accent/20 p-3 rounded-xl calendar-icon">
+                                <svg class="w-8 h-8 text-aura-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                    <line x1="16" y1="2" x2="16" y2="6"/>
+                                    <line x1="8" y1="2" x2="8" y2="6"/>
+                                    <line x1="3" y1="10" x2="21" y2="10"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h1 class="text-3xl font-semibold text-white mb-2">Project Calendar</h1>
+                                <p class="text-aura-muted">Track project deadlines, milestones, and task schedules</p>
+                            </div>
+                        </div>
+
+                        <!-- Navigation Icons -->
+                        <div class="flex items-center gap-3">
+                            <a href="{{ url_for('overview_view') }}" class="nav-icon text-aura-text hover:text-white" title="Dashboard">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                </svg>
+                            </a>
+                            <a href="{{ url_for('index') }}" class="nav-icon text-aura-text hover:text-white" title="Kanban Board">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                </svg>
+                            </a>
+                            <a href="{{ url_for('manage_projects') }}" class="nav-icon text-aura-text hover:text-white" title="Projects">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h5l2 3h11v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" />
+                                </svg>
+                            </a>
+                            <a href="{{ url_for('timeline_view') }}" class="nav-icon text-aura-text hover:text-white" title="Timeline">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Stats Row -->
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-8">
+                            <!-- Stats will be populated by JavaScript -->
+                            <div class="text-center">
+                                <div class="text-2xl font-semibold text-white mb-1" id="totalTasksHeader">-</div>
+                                <div class="text-xs text-aura-muted uppercase tracking-wider" style="font-size: 10px;">Total Tasks</div>
+                            </div>
+                            <div class="stat-divider"></div>
+
+                            <div class="text-center">
+                                <div class="text-2xl font-semibold text-white mb-1" id="dueTasksHeader">-</div>
+                                <div class="text-xs text-aura-muted uppercase tracking-wider" style="font-size: 10px;">Due This Week</div>
+                            </div>
+                            <div class="stat-divider"></div>
+
+                            <div class="text-center">
+                                <div class="text-2xl font-semibold text-white mb-1" id="overdueTasksHeader">-</div>
+                                <div class="text-xs text-aura-muted uppercase tracking-wider" style="font-size: 10px;">Overdue</div>
+                            </div>
+                            <div class="stat-divider"></div>
+
+                            <div class="text-center">
+                                <div class="text-2xl font-semibold text-aura-accent mb-1" id="completedTasksHeader">-</div>
+                                <div class="text-xs text-aura-muted uppercase tracking-wider" style="font-size: 10px;">Completed</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="flex items-center gap-3 mt-6 pt-6 border-t border-aura-border">
+                        <span class="text-xs text-aura-muted">Quick Actions:</span>
+                        <a href="{{ url_for('overview_view') }}" class="control-btn">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                            </svg>
+                            Dashboard
+                        </a>
+                        <a href="{{ url_for('index') }}" class="control-btn">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                            </svg>
+                            Kanban
+                        </a>
+                        <a href="{{ url_for('timeline_view') }}" class="control-btn">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Timeline
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Stats Row -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <div class="stat-card glass-effect rounded-xl p-4 text-center">
+                        <div class="stat-number text-2xl mb-1" id="totalTasks">-</div>
+                        <div class="text-xs text-aura-muted uppercase tracking-wider">Total Tasks</div>
+                    </div>
+                    <div class="stat-card glass-effect rounded-xl p-4 text-center">
+                        <div class="stat-number text-2xl mb-1" id="dueTasks">-</div>
+                        <div class="text-xs text-aura-muted uppercase tracking-wider">Due This Week</div>
+                    </div>
+                    <div class="stat-card glass-effect rounded-xl p-4 text-center">
+                        <div class="stat-number text-2xl mb-1" id="overdueTasks">-</div>
+                        <div class="text-xs text-aura-muted uppercase tracking-wider">Overdue</div>
+                    </div>
+                    <div class="stat-card glass-effect rounded-xl p-4 text-center">
+                        <div class="stat-number text-2xl mb-1" id="completedTasks">-</div>
+                        <div class="text-xs text-aura-muted uppercase tracking-wider">Completed</div>
+                    </div>
+                </div>
+
+                <!-- Calendar Controls -->
+                <div class="calendar-controls glass-effect">
+                    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                        <div class="status-legend">
+                            <div class="legend-item">
+                                <div class="legend-color to-do"></div>
+                                <span>To-Do</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color in-progress"></div>
+                                <span>In Progress</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color to-be-review"></div>
+                                <span>Review</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color done"></div>
+                                <span>Done</span>
+                            </div>
+                        </div>
+                        <button id="refreshCalendar" class="control-btn" title="Refresh calendar">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Calendar -->
+                <div class="calendar-container glass-effect rounded-2xl overflow-hidden">
+                    <div class="calendar-wrapper">
+                        <div id="calendar">
+                            <!-- Calendar will be rendered here by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let calendar; // Global calendar variable
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var tasksRaw = [];
+            var tasksJsonData = '{{ tasks_json|safe }}'; // Use the 'safe' filter for pre-escaped JSON
+
+            if (tasksJsonData) {
+                try {
+                    tasksRaw = JSON.parse(tasksJsonData);
+                } catch (e) {
+                    console.error("Error parsing task data JSON:", e);
+                    // Graceful fallback instead of alert
+                    updateCalendarStats([]);
+                }
+            }
+
+            // Filter and map tasks to calendar events
+            var calendarEvents = tasksRaw.filter(function(task) {
+                return task.due_date; // Ensure task has a due_date
+            }).map(function(task) {
+                return {
+                    title: task.title,
+                    start: task.due_date, // This is already in 'YYYY-MM-DD' format from to_dict
+                    url: task.url,        // This is already the correct URL from to_dict
+                    className: 'status-' + task.status.toLowerCase().replace(/\s+/g, '-').replace(/\s/g, '-'),
+                    extendedProps: {
+                        project: task.project_name,
+                        description: task.description,
+                        status: task.status,
+                        assignee: task.assignee_name,
+                        priority: task.priority
+                    }
+                };
+            });
+
+            // Calculate and update statistics
+            updateCalendarStats(calendarEvents);
+
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,listWeek'
+                },
+                events: calendarEvents,
+                height: 'auto',
+                aspectRatio: 1.8,
+                dayMaxEvents: 3,
+                moreLinkClick: 'popover',
+                eventDisplay: 'block',
+                eventClick: function(info) {
+                    info.jsEvent.preventDefault(); 
+                    if (info.event.url) {
+                        // Add loading state
+                        info.el.style.opacity = '0.7';
+                        info.el.style.transform = 'scale(0.98)';
+                        
+                        // Navigate with smooth transition
+                        setTimeout(() => {
+                            window.location.href = info.event.url;
+                        }, 150);
+                    }
+                },
+                eventMouseEnter: function(info) {
+                    // Enhanced tooltip with more information
+                    const props = info.event.extendedProps;
+                    const tooltipText = `${info.event.title}\nProject: ${props.project}\nStatus: ${props.status}\nAssignee: ${props.assignee || 'Unassigned'}\nDue: ${info.event.start.toLocaleDateString()}`;
+                    
+                    // Create custom tooltip
+                    const tooltip = document.createElement('div');
+                    tooltip.className = 'event-tooltip';
+                    tooltip.style.cssText = `
+                        position: absolute;
+                        background: linear-gradient(135deg, rgba(19, 20, 26, 0.95), rgba(31, 32, 35, 0.9));
+                        color: #b4bcd0;
+                        padding: 0.75rem;
+                        border-radius: 8px;
+                        font-size: 0.75rem;
+                        z-index: 1000;
+                        border: 1px solid rgba(31, 32, 35, 0.8);
+                        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                        backdrop-filter: blur(20px);
+                        pointer-events: none;
+                        max-width: 200px;
+                        line-height: 1.4;
+                        white-space: pre-line;
+                    `;
+                    tooltip.textContent = tooltipText;
+                    document.body.appendChild(tooltip);
+                    
+                    // Position tooltip
+                    const rect = info.el.getBoundingClientRect();
+                    tooltip.style.left = (rect.left + rect.width / 2) + 'px';
+                    tooltip.style.top = (rect.top - tooltip.offsetHeight - 10) + 'px';
+                    
+                    // Store reference for cleanup
+                    info.el._tooltip = tooltip;
+                    
+                    // Add hover effect
+                    info.el.style.transform = 'scale(1.05) translateY(-2px)';
+                    info.el.style.zIndex = '20';
+                    info.el.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.3)';
+                },
+                eventMouseLeave: function(info) {
+                    // Remove tooltip
+                    if (info.el._tooltip) {
+                        document.body.removeChild(info.el._tooltip);
+                        info.el._tooltip = null;
+                    }
+                    
+                    // Remove hover effect
+                    info.el.style.transform = 'scale(1) translateY(0)';
+                    info.el.style.zIndex = '1';
+                    info.el.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+                },
+                dayCellDidMount: function(info) {
+                    // Add subtle hover effect to day cells
+                    info.el.addEventListener('mouseenter', function() {
+                        this.style.backgroundColor = 'rgba(31, 32, 35, 0.6)';
+                    });
+                    info.el.addEventListener('mouseleave', function() {
+                        this.style.backgroundColor = '';
+                    });
+                },
+                datesSet: function(info) {
+                    // Update stats when date range changes
+                    updateCalendarStats(calendarEvents, info.start, info.end);
+                }
+            });
+
+            calendar.render();
+
+            // Add refresh functionality
+            document.getElementById('refreshCalendar').addEventListener('click', function() {
+                const btn = this;
+                const icon = btn.querySelector('svg');
+                
+                // Add spinning animation
+                icon.classList.add('spin');
+                btn.classList.add('active');
+                
+                // Show brief loading feedback
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = `
+                    <svg class="w-4 h-4 spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Refreshing...
+                `;
+                
+                // Refresh calendar
+                calendar.refetchEvents();
+                
+                // Refresh stats
+                updateCalendarStats(calendarEvents);
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                    btn.classList.remove('active');
+                }, 1000);
+            });
+
+            // Function to calculate and update calendar statistics
+            function updateCalendarStats(events, startDate, endDate) {
+                const now = new Date();
+                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                const oneWeekFromNow = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+                const stats = {
+                    total: events.length,
+                    dueThisWeek: 0,
+                    overdue: 0,
+                    completed: 0
+                };
+
+                events.forEach(function(event) {
+                    const eventDate = new Date(event.start);
+                    
+                    // Due this week
+                    if (eventDate >= today && eventDate <= oneWeekFromNow) {
+                        stats.dueThisWeek++;
+                    }
+                    
+                    // Overdue
+                    if (eventDate < today && event.extendedProps.status !== 'Done') {
+                        stats.overdue++;
+                    }
+                    
+                    // Completed
+                    if (event.extendedProps.status === 'Done') {
+                        stats.completed++;
+                    }
+                });
+
+                // Update both the main stats and header stats with smooth number animation
+                animateNumber('totalTasks', stats.total);
+                animateNumber('dueTasks', stats.dueThisWeek);
+                animateNumber('overdueTasks', stats.overdue);
+                animateNumber('completedTasks', stats.completed);
+
+                // Update header stats too
+                animateNumber('totalTasksHeader', stats.total);
+                animateNumber('dueTasksHeader', stats.dueThisWeek);
+                animateNumber('overdueTasksHeader', stats.overdue);
+                animateNumber('completedTasksHeader', stats.completed);
+
+                // Add visual indicators for concerning numbers
+                const overdueElement = document.getElementById('overdueTasks');
+                const overdueHeaderElement = document.getElementById('overdueTasksHeader');
+                if (stats.overdue > 0) {
+                    [overdueElement, overdueHeaderElement].forEach(function(elem) {
+                        if (elem) {
+                            elem.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+                            elem.style.backgroundClip = 'text';
+                            elem.style.webkitBackgroundClip = 'text';
+                            elem.style.color = 'transparent';
+                        }
+                    });
+                } else {
+                    [overdueElement, overdueHeaderElement].forEach(function(elem) {
+                        if (elem) {
+                            elem.style.background = 'linear-gradient(135deg, #5e6ad2, #8b5cf6)';
+                            elem.style.backgroundClip = 'text';
+                            elem.style.webkitBackgroundClip = 'text';
+                            elem.style.color = 'transparent';
+                        }
+                    });
+                }
+
+                const dueElement = document.getElementById('dueTasks');
+                const dueHeaderElement = document.getElementById('dueTasksHeader');
+                if (stats.dueThisWeek > 5) {
+                    [dueElement, dueHeaderElement].forEach(function(elem) {
+                        if (elem) {
+                            elem.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+                            elem.style.backgroundClip = 'text';
+                            elem.style.webkitBackgroundClip = 'text';
+                            elem.style.color = 'transparent';
+                        }
+                    });
+                } else {
+                    [dueElement, dueHeaderElement].forEach(function(elem) {
+                        if (elem) {
+                            elem.style.background = 'linear-gradient(135deg, #5e6ad2, #8b5cf6)';
+                            elem.style.backgroundClip = 'text';
+                            elem.style.webkitBackgroundClip = 'text';
+                            elem.style.color = 'transparent';
+                        }
+                    });
+                }
+            }
+
+            // Smooth number animation function
+            function animateNumber(elementId, targetValue) {
+                const element = document.getElementById(elementId);
+                if (!element) return;
+                
+                const currentValue = parseInt(element.textContent) || 0;
+                const duration = 800;
+                const startTime = performance.now();
+
+                function updateNumber(currentTime) {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    
+                    // Easing function for smooth animation
+                    const easeOut = 1 - Math.pow(1 - progress, 3);
+                    const currentNumber = Math.round(currentValue + (targetValue - currentValue) * easeOut);
+                    
+                    element.textContent = currentNumber;
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(updateNumber);
+                    }
+                }
+                
+                requestAnimationFrame(updateNumber);
+            }
+
+            // Mobile menu toggle
+            const menuToggle = document.getElementById('menuToggle');
+            if (menuToggle) {
+                menuToggle.addEventListener('click', function () {
+                    const sidebar = document.getElementById('sidebar');
+                    sidebar.classList.toggle('hidden');
+                });
+            }
+
+            // User menu dropdown toggle
+            const userMenuToggle = document.getElementById('userMenuToggle');
+            const userMenu = document.getElementById('userMenu');
+            if (userMenuToggle && userMenu) {
+                userMenuToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    userMenu.classList.toggle('hidden');
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!userMenuToggle.contains(e.target) && !userMenu.contains(e.target)) {
+                        userMenu.classList.add('hidden');
+                    }
+                });
+
+                // Close dropdown when pressing Escape
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        userMenu.classList.add('hidden');
+                    }
+                });
+            }
+        });
+    </script>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="fixed bottom-4 right-4 z-50 space-y-2">
+        {% for category, message in messages %}
+        <div class="flash-message {{ category }} px-4 py-3 rounded-lg shadow-lg bg-aura-card text-aura-text border border-aura-border max-w-sm">
+            <div class="flex items-center gap-2">
+                {% if category == 'success' %}
+                <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                {% elif category == 'danger' %}
+                <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                {% endif %}
+                <span class="text-sm">{{ message }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+</body>
+</html> 

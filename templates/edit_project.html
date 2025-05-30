@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Project - Project Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        aura: {
+                            bg: '#0d0e10',
+                            card: '#13141a',
+                            border: '#1f2023',
+                            accent: '#5e6ad2',
+                            purple: '#8b5cf6',
+                            text: '#b4bcd0',
+                            muted: '#7c8794',
+                            darker: '#070707',
+                            lighter: '#1a1a1a'
+                        }
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-effect {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .header-card {
+            background: linear-gradient(135deg,
+                    rgba(19, 20, 26, 0.95) 0%,
+                    rgba(31, 32, 35, 0.8) 100%);
+            border: 1px solid rgba(31, 32, 35, 0.8);
+        }
+
+        .nav-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(31, 32, 35, 0.8);
+            border: 1px solid rgba(94, 106, 210, 0.2);
+            transition: all 0.2s ease;
+            font-size: 12px;
+        }
+
+        .nav-icon:hover {
+            background: rgba(94, 106, 210, 0.1);
+            border-color: rgba(94, 106, 210, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .edit-card {
+            background: linear-gradient(135deg,
+                    rgba(19, 20, 26, 0.9) 0%,
+                    rgba(31, 32, 35, 0.5) 100%);
+            border: 1px solid rgba(31, 32, 35, 0.8);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .edit-card:hover {
+            border-color: rgba(94, 106, 210, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            padding: 1.25rem 1.5rem 1rem;
+            border-bottom: 1px solid rgba(31, 32, 35, 0.8);
+        }
+
+        .card-header h2 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid rgba(31, 32, 35, 0.8);
+            border-radius: 6px;
+            background: rgba(31, 32, 35, 0.5);
+            color: #ffffff;
+            font-size: 0.875rem;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: rgba(94, 106, 210, 0.4);
+            box-shadow: 0 0 0 2px rgba(94, 106, 210, 0.1);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #5e6ad2, #8b5cf6);
+            color: white;
+            border-color: #5e6ad2;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #4c51bf, #7c3aed);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(94, 106, 210, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(107, 114, 128, 0.1);
+            color: #6b7280;
+            border-color: rgba(107, 114, 128, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(107, 114, 128, 0.2);
+            color: #ffffff;
+        }
+
+        .btn-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+            border-color: rgba(245, 158, 11, 0.2);
+        }
+
+        .btn-warning:hover {
+            background: rgba(245, 158, 11, 0.2);
+            border-color: rgba(245, 158, 11, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .btn-full {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .member-item {
+            padding: 0.75rem 1rem;
+            background: rgba(31, 32, 35, 0.5);
+            border: 1px solid rgba(31, 32, 35, 0.8);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .member-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .member-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #5e6ad2, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .edit-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            max-width: 6xl;
+            margin: 0 auto;
+        }
+
+        @media (min-width: 1024px) {
+            .edit-grid {
+                grid-template-columns: 2fr 1fr;
+            }
+        }
+
+        .flash-messages {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            z-index: 50;
+        }
+    </style>
+</head>
+<body class="bg-aura-bg text-aura-text font-inter min-h-screen">
+    <div class="flex flex-col md:flex-row h-screen">
+        <!-- Mobile header -->
+        <header class="md:hidden bg-darker p-4 flex justify-between items-center border-b border-lighter">
+            <div class="flex items-center space-x-2">
+                <div class="h-6 w-6 rounded-md bg-accent"></div>
+                <span class="font-medium">Edit Project</span>
+            </div>
+            <button id="menuToggle" class="text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </header>
+
+        <!-- Sidebar -->
+        <div id="sidebar" class="hidden md:block w-full md:w-64 header-card flex-shrink-0 flex flex-col h-screen md:h-auto overflow-y-auto">
+            <div class="p-4 md:block hidden">
+                <div class="flex items-center space-x-2">
+                    <div class="h-6 w-6 rounded-md bg-accent"></div>
+                    <span class="font-medium">Workspace</span>
+                </div>
+            </div>
+
+            <nav class="flex-1 py-4">
+                <div class="px-3 mb-2 text-xs font-medium text-muted">WORKSPACE</div>
+                <a href="{{ url_for('overview_view') }}" class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    Home
+                </a>
+                <a href="{{ url_for('index') }}" class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                    </svg>
+                    Issues
+                </a>
+                <a href="{{ url_for('manage_projects') }}" class="flex items-center px-3 py-2 text-sm text-white bg-aura-purple rounded-md mx-2 mt-1">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h5l2 3h11v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"></path>
+                    </svg>
+                    Projects
+                </a>
+                <a href="{{ url_for('calendar_view') }}" class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                    Analytics
+                </a>
+                <a href="{{ url_for('timeline_view') }}" class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Timeline
+                </a>
+
+                <div class="px-3 mt-6 mb-2 text-xs font-medium text-muted">TEAMS</div>
+                <a href="#" class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2">
+                    <div class="w-4 h-4 rounded-sm bg-purple-500 mr-3"></div>
+                    Design
+                </a>
+                <a href="#" class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <div class="w-4 h-4 rounded-sm bg-blue-500 mr-3"></div>
+                    Engineering
+                </a>
+                <a href="#" class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <div class="w-4 h-4 rounded-sm bg-green-500 mr-3"></div>
+                    Product
+                </a>
+            </nav>
+
+            <div class="p-4 border-t border-aura-border">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 rounded-full bg-accent flex items-center justify-center">
+                            <span class="text-sm font-medium">{{ current_user.username[0]|upper if current_user.username else 'U' }}</span>
+                        </div>
+                        <div class="ml-2">
+                            <div class="text-sm font-medium">{{ current_user.username if current_user.username else 'User' }}</div>
+                            <div class="text-xs text-muted">My Workspace</div>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <button id="userMenuToggle" class="nav-icon text-aura-text hover:text-white" title="User menu">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div id="userMenu" class="hidden absolute bottom-full right-0 mb-2 w-48 bg-aura-card border border-aura-border rounded-lg shadow-lg">
+                            <div class="py-1">
+                                <a href="{{ url_for('user_settings') }}" class="flex items-center px-4 py-2 text-sm text-aura-text hover:bg-aura-border hover:text-white">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                    Settings
+                                </a>
+                                <div class="border-t border-aura-border"></div>
+                                <a href="{{ url_for('logout') }}" class="flex items-center px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                    </svg>
+                                    Logout
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="flex-1 flex flex-col overflow-y-auto">
+            <div class="max-w-7xl mx-auto p-8 w-full">
+                <!-- Header -->
+                <div class="header-card glass-effect rounded-2xl p-8 mb-8">
+                    <div class="flex items-start justify-between mb-6">
+                        <div class="flex items-start gap-4">
+                            <div class="bg-aura-accent/20 p-3 rounded-xl">
+                                <svg class="w-8 h-8 text-aura-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h1 class="text-3xl font-semibold text-white mb-2">Edit Project: {{ project.name }}</h1>
+                                <p class="text-aura-muted">Modify project details and manage team members</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <a href="{{ url_for('manage_projects') }}" class="nav-icon text-aura-text hover:text-white" title="Back to Projects">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Edit Content -->
+                <div class="edit-grid">
+                    <!-- Project Details Card -->
+                    <div class="edit-card">
+                        <div class="card-header">
+                            <h2>
+                                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                    <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                                Project Details
+                            </h2>
+                        </div>
+                        <div class="card-content">
+                            <form method="POST" action="{{ url_for('edit_project', project_id=project.id) }}">
+                                <div class="form-group">
+                                    <label for="name">Project Name</label>
+                                    <input type="text" id="name" name="name" class="form-control" value="{{ project.name }}" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="description">Description</label>
+                                    <textarea id="description" name="description" class="form-control" rows="4">{{ project.description if project.description is not none else '' }}</textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="start_date">Start Date</label>
+                                    <input type="date" id="start_date" name="start_date" class="form-control" value="{{ project.start_date.strftime('%Y-%m-%d') if project.start_date else '' }}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="end_date">End Date</label>
+                                    <input type="date" id="end_date" name="end_date" class="form-control" value="{{ project.end_date.strftime('%Y-%m-%d') if project.end_date else '' }}">
+                                </div>
+                                <button type="submit" name="update_details" class="btn btn-primary btn-full">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                        <path d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    Save Project Details
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Team Management Card -->
+                    <div class="edit-card">
+                        <div class="card-header">
+                            <h2>
+                                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87m-4-12a4 4 0 0 1 0 7.75"></path>
+                                </svg>
+                                Team Management
+                            </h2>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="text-lg font-semibold text-white mb-4">Current Members</h3>
+                            <div class="space-y-2 mb-6">
+                                <div class="member-item">
+                                    <div class="member-info">
+                                        <div class="member-avatar">{{ project.owner_user.username[0]|upper }}</div>
+                                        <div>
+                                            <div class="text-white font-medium">{{ project.owner_user.username }}</div>
+                                            <div class="text-xs text-aura-muted">Project Owner</div>
+                                        </div>
+                                    </div>
+                                    <span class="px-2 py-1 rounded-md bg-amber-500/20 text-amber-400 text-xs font-medium">Owner</span>
+                                </div>
+                                {% for member in current_members %}
+                                    {% if member.id != project.owner_id %}
+                                        <div class="member-item">
+                                            <div class="member-info">
+                                                <div class="member-avatar">{{ member.username[0]|upper }}</div>
+                                                <div>
+                                                    <div class="text-white font-medium">{{ member.username }}</div>
+                                                    <div class="text-xs text-aura-muted">Team Member</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+
+                            {% if potential_new_members %}
+                                <div class="border-t border-aura-border pt-6">
+                                    <h3 class="text-lg font-semibold text-white mb-4">Add Team Member</h3>
+                                    <form method="POST" action="{{ url_for('add_project_member', project_id=project.id) }}">
+                                        <div class="form-group">
+                                            <label for="user_id">Select User to Add</label>
+                                            <select id="user_id" name="user_id" class="form-control" required>
+                                                <option value="">-- Select a user --</option>
+                                                {% for user in potential_new_members %}
+                                                    <option value="{{ user.id }}">{{ user.username }}{% if user.email %} ({{ user.email }}){% endif %}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <button type="submit" class="btn btn-secondary btn-full">
+                                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2m11-10a4 4 0 0 1 0 7.75M15 4h6m-3-3v6"></path>
+                                            </svg>
+                                            Add Member to Project
+                                        </button>
+                                    </form>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project Actions Section -->
+                <div class="mt-8">
+                    <div class="edit-card">
+                        <div class="card-header">
+                            <h2>
+                                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                                </svg>
+                                Project Actions
+                            </h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Archive Project -->
+                                <div class="p-4 border border-amber-500/20 bg-amber-500/5 rounded-lg">
+                                    <div class="flex items-start gap-3 mb-3">
+                                        <div class="bg-amber-500/20 p-2 rounded-lg">
+                                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="text-amber-400">
+                                                <polyline points="21,8 21,21 3,21 3,8"></polyline>
+                                                <rect x="1" y="3" width="22" height="5"></rect>
+                                                <line x1="10" y1="12" x2="14" y2="12"></line>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h3 class="text-white font-medium mb-1">Archive Project</h3>
+                                            <p class="text-sm text-aura-muted">Hide this project from active view while preserving all data.</p>
+                                        </div>
+                                    </div>
+                                    {% if not project.archived %}
+                                    <button onclick="confirmArchive()" class="btn btn-warning btn-full">
+                                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                            <polyline points="21,8 21,21 3,21 3,8"></polyline>
+                                            <rect x="1" y="3" width="22" height="5"></rect>
+                                            <line x1="10" y1="12" x2="14" y2="12"></line>
+                                        </svg>
+                                        Archive Project
+                                    </button>
+                                    {% else %}
+                                    <form method="POST" action="{{ url_for('unarchive_project', project_id=project.id) }}" style="display: inline;">
+                                        <button type="submit" class="btn btn-warning btn-full">
+                                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                                <polyline points="14,2 14,8 20,8"></polyline>
+                                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                                <polyline points="10,9 9,9 8,9"></polyline>
+                                            </svg>
+                                            Restore Project
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Delete Project -->
+                                <div class="p-4 border border-red-500/20 bg-red-500/5 rounded-lg">
+                                    <div class="flex items-start gap-3 mb-3">
+                                        <div class="bg-red-500/20 p-2 rounded-lg">
+                                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="text-red-400">
+                                                <polyline points="3,6 5,6 21,6"></polyline>
+                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                                <line x1="10" y1="11" x2="10" y2="17"></line>
+                                                <line x1="14" y1="11" x2="14" y2="17"></line>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h3 class="text-white font-medium mb-1">Delete Project</h3>
+                                            <p class="text-sm text-aura-muted">Permanently delete this project and all associated tasks.</p>
+                                        </div>
+                                    </div>
+                                    <button onclick="confirmDelete()" class="btn btn-danger btn-full">
+                                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                            <polyline points="3,6 5,6 21,6"></polyline>
+                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                                            <line x1="14" y1="11" x2="14" y2="17"></line>
+                                        </svg>
+                                        Delete Project
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Archive Confirmation Modal -->
+    <div id="archiveModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-aura-card border border-aura-border rounded-lg p-6 max-w-md mx-4">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="bg-amber-500/20 p-2 rounded-lg">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="text-amber-400">
+                        <polyline points="21,8 21,21 3,21 3,8"></polyline>
+                        <rect x="1" y="3" width="22" height="5"></rect>
+                        <line x1="10" y1="12" x2="14" y2="12"></line>
+                    </svg>
+                </div>
+                <h3 class="text-white font-semibold">Archive Project</h3>
+            </div>
+            <p class="text-aura-text mb-6">Are you sure you want to archive "{{ project.name }}"? This will hide the project from your active projects list, but all data will be preserved and can be restored later.</p>
+            <div class="flex gap-3">
+                <button onclick="closeArchiveModal()" class="btn btn-secondary flex-1">Cancel</button>
+                <form method="POST" action="{{ url_for('archive_project', project_id=project.id) }}" class="flex-1">
+                    <button type="submit" class="btn btn-warning btn-full">Archive</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-aura-card border border-aura-border rounded-lg p-6 max-w-md mx-4">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="bg-red-500/20 p-2 rounded-lg">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="text-red-400">
+                        <path d="M12 9v3m0 3h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-white font-semibold">Delete Project</h3>
+            </div>
+            <p class="text-aura-text mb-6">Are you sure you want to permanently delete "{{ project.name }}"? This action cannot be undone and will delete all associated tasks and data.</p>
+            <div class="flex gap-3">
+                <button onclick="closeDeleteModal()" class="btn btn-secondary flex-1">Cancel</button>
+                <form method="POST" action="{{ url_for('delete_project', project_id=project.id) }}" class="flex-1">
+                    <button type="submit" class="btn btn-danger btn-full">Delete Forever</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile menu toggle
+            const menuToggle = document.getElementById('menuToggle');
+            if (menuToggle) {
+                menuToggle.addEventListener('click', function () {
+                    const sidebar = document.getElementById('sidebar');
+                    sidebar.classList.toggle('hidden');
+                });
+            }
+
+            // User menu dropdown toggle
+            const userMenuToggle = document.getElementById('userMenuToggle');
+            const userMenu = document.getElementById('userMenu');
+            if (userMenuToggle && userMenu) {
+                userMenuToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    userMenu.classList.toggle('hidden');
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!userMenuToggle.contains(e.target) && !userMenu.contains(e.target)) {
+                        userMenu.classList.add('hidden');
+                    }
+                });
+
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        userMenu.classList.add('hidden');
+                    }
+                });
+            }
+        });
+
+        // Modal functions
+        function confirmArchive() {
+            document.getElementById('archiveModal').classList.remove('hidden');
+        }
+
+        function closeArchiveModal() {
+            document.getElementById('archiveModal').classList.add('hidden');
+        }
+
+        function confirmDelete() {
+            document.getElementById('deleteModal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.add('hidden');
+        }
+
+        // Close modals when clicking outside
+        document.addEventListener('click', function(e) {
+            if (e.target.id === 'archiveModal') {
+                closeArchiveModal();
+            }
+            if (e.target.id === 'deleteModal') {
+                closeDeleteModal();
+            }
+        });
+
+        // Close modals with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeArchiveModal();
+                closeDeleteModal();
+            }
+        });
+    </script>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul class="flash-messages list-none p-0 m-0">
+            {% for category, message in messages %}
+                <li class="p-3 rounded-md mb-2 border border-aura-border bg-aura-card text-sm text-aura-text">{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+</body>
+</html> 

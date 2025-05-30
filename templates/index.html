@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Issues - Project Management</title>
+    <!-- External Fonts and Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+    <!-- SortableJS via CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <!-- Your custom CSS (must be after Tailwind and FontAwesome) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+</head>
+
+<body class="bg-aura-bg text-aura-text font-inter min-h-screen">
+
+    <div class="flex flex-col md:flex-row h-screen">
+        <!-- Mobile header -->
+        <header class="md:hidden bg-darker p-4 flex justify-between items-center border-b border-lighter">
+            <div class="flex items-center space-x-2">
+                <div class="h-6 w-6 rounded-md bg-accent"></div>
+                <span class="font-medium">Issues</span>
+            </div>
+            <button id="menuToggle" class="text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16">
+                    </path>
+                </svg>
+            </button>
+        </header>
+
+        <!-- Sidebar -->
+        <div id="sidebar"
+            class="hidden md:block w-full md:w-64 header-card flex-shrink-0 flex flex-col h-screen md:h-auto overflow-y-auto">
+            <div class="p-4 md:block hidden">
+                <div class="flex items-center space-x-2">
+                    <div class="h-6 w-6 rounded-md bg-accent"></div>
+                    <span class="font-medium">Workspace</span>
+                </div>
+            </div>
+
+            <nav class="flex-1 py-4">
+                <div class="px-3 mb-2 text-xs font-medium text-muted">WORKSPACE</div>
+                <a href="{{ url_for('overview_view') }}"
+                    class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                    Home
+                </a>
+                <a href="{{ url_for('index') }}"
+                    class="flex items-center px-3 py-2 text-sm text-white bg-aura-purple rounded-md mx-2 mt-1">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01">
+                        </path>
+                    </svg>
+                    Issues
+                </a>
+                <a href="{{ url_for('manage_projects') }}"
+                    class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 7h5l2 3h11v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" />
+                    </svg>
+                    Projects
+                </a>
+                <a href="{{ url_for('calendar_view') }}"
+                    class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                        </path>
+                    </svg>
+                    Analytics
+                </a>
+                <a href="{{ url_for('timeline_view') }}"
+                    class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z">
+                        </path>
+                    </svg>
+                    Timeline
+                </a>
+
+                <div class="px-3 mt-6 mb-2 text-xs font-medium text-muted">TEAMS</div>
+                <a href="#"
+                    class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2">
+                    <div class="w-4 h-4 rounded-sm bg-purple-500 mr-3"></div>
+                    Design
+                </a>
+                <a href="#"
+                    class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <div class="w-4 h-4 rounded-sm bg-blue-500 mr-3"></div>
+                    Engineering
+                </a>
+                <a href="#"
+                    class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <div class="w-4 h-4 rounded-sm bg-green-500 mr-3"></div>
+                    Product
+                </a>
+            </nav>
+
+            <div class="p-4 border-t border-aura-border">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 rounded-full bg-accent flex items-center justify-center">
+                            <span class="text-sm font-medium">{{ current_user.username[0]|upper if current_user.username
+                                else 'U' }}</span>
+                        </div>
+                        <div class="ml-2">
+                            <div class="text-sm font-medium">{{ current_user.username if current_user.username else
+                                'User' }}</div>
+                            <div class="text-xs text-muted">My Workspace</div>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <button id="userMenuToggle" class="nav-icon text-aura-text hover:text-white" title="User menu">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div id="userMenu"
+                            class="hidden absolute bottom-full right-0 mb-2 w-48 bg-aura-card border border-aura-border rounded-lg shadow-lg">
+                            <div class="py-1">
+                                <a href="{{ url_for('user_settings') }}"
+                                    class="flex items-center px-4 py-2 text-sm text-aura-text hover:bg-aura-border hover:text-white">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    Settings
+                                </a>
+                                <div class="border-t border-aura-border"></div>
+                                <a href="{{ url_for('logout') }}"
+                                    class="flex items-center px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                    </svg>
+                                    Logout
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="flex-1 flex flex-col overflow-y-auto">
+            <!-- Dashboard Header -->
+            <div class="mx-auto p-8 w-full">
+                <div class="header-card glass-effect rounded-2xl p-8 mb-8">
+                    <!-- Dashboard Header Content -->
+                    <div class="flex items-start justify-between mb-6">
+                        <div>
+                            <h1 class="text-3xl font-semibold text-white mb-1 flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-aura-accent/20 flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-aura-accent" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                    </svg>
+                                </div>
+                                Issue Board
+                            </h1>
+                            <p class="text-aura-muted">Manage your tasks with our interactive kanban board.</p>
+                        </div>
+
+                        <!-- Navigation Icons -->
+                        <div class="flex items-center gap-3">
+                            <a href="{{ url_for('overview_view') }}" class="nav-icon text-aura-text hover:text-white"
+                                title="Dashboard">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                </svg>
+                            </a>
+                            <a href="{{ url_for('manage_projects') }}" class="nav-icon text-aura-text hover:text-white"
+                                title="Projects">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 7h5l2 3h11v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" />
+                                </svg>
+                            </a>
+                            <a href="{{ url_for('timeline_view') }}" class="nav-icon text-aura-text hover:text-white"
+                                title="Timeline">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </a>
+                            <a href="{{ url_for('calendar_view') }}" class="nav-icon text-aura-text hover:text-white"
+                                title="Calendar">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Stats Row -->
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-8">
+                            <!-- Dashboard Stats -->
+                            {% set total_tasks = tasks_by_status['To-Do']|length + tasks_by_status['In Progress']|length
+                            + tasks_by_status['To Be Review']|length + tasks_by_status['Done']|length %}
+                            <div class="text-center">
+                                <div class="text-2xl font-semibold text-white mb-1">{{ total_tasks }}</div>
+                                <div class="text-xs text-aura-muted uppercase tracking-wider" style="font-size: 10px;">
+                                    Total Tasks</div>
+                            </div>
+                            <div class="stat-divider"></div>
+
+                            <div class="text-center">
+                                <div class="text-2xl font-semibold text-white mb-1">{{ tasks_by_status['In
+                                    Progress']|length }}</div>
+                                <div class="text-xs text-aura-muted uppercase tracking-wider" style="font-size: 10px;">
+                                    In Progress</div>
+                            </div>
+                            <div class="stat-divider"></div>
+
+                            <div class="text-center">
+                                <div class="text-2xl font-semibold text-white mb-1">{{ tasks_by_status['Done']|length }}
+                                </div>
+                                <div class="text-xs text-aura-muted uppercase tracking-wider" style="font-size: 10px;">
+                                    Completed</div>
+                            </div>
+                            <div class="stat-divider"></div>
+
+                            <div class="text-center">
+                                {% if total_tasks > 0 %}
+                                {% set progress_percentage = (tasks_by_status['Done']|length / total_tasks * 100)|round
+                                %}
+                                {% else %}
+                                {% set progress_percentage = 0 %}
+                                {% endif %}
+                                <div class="text-2xl font-semibold text-aura-accent mb-1">{{ progress_percentage }}%
+                                </div>
+                                <div class="text-xs text-aura-muted uppercase tracking-wider" style="font-size: 10px;">
+                                    Progress</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="flex items-center gap-3 mt-6 pt-6 border-t border-aura-border">
+                        <span class="text-xs text-aura-muted">Quick Actions:</span>
+                        <a href="{{ url_for('manage_projects') }}" class="quick-action-btn">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                <path d="M12 2v20m8-10H4" />
+                            </svg>
+                            New Project
+                        </a>
+                        {% if user_projects %}
+                        <a href="{{ url_for('add_task', project_id=user_projects[0].id) }}" class="quick-action-btn">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                <path d="M12 2v20m8-10H4" />
+                            </svg>
+                            Add Task
+                        </a>
+                        {% endif %}
+                        <a href="{{ url_for('calendar_view') }}" class="quick-action-btn">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                <rect x="3" y="4" width="18" height="18" rx="2" />
+                                <path d="M16 2v4M8 2v4M3 10h18" />
+                            </svg>
+                            View Calendar
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Main Body Grid -->
+                <div class="main-body-grid" style="display: grid; grid-template-columns: 1fr 280px; gap: 1.5rem;">
+
+                    <!-- Define project color mapping for consistent colors across the interface -->
+                    {% set project_colors = ['#6366f1', '#f59e42', '#10b981', '#f43f5e', '#3b82f6', '#a21caf',
+                    '#fbbf24', '#14b8a6'] %}
+                    {% set project_color_map = {} %}
+                    {% for project in user_projects if not project.archived %}
+                    {% set _ = project_color_map.update({project.id: project_colors[loop.index0 %
+                    project_colors|length]}) %}
+                    {% endfor %}
+
+                    <main class="main-content">
+                        <section class="kanban-board">
+                            {% set statuses = ['To-Do', 'In Progress', 'To Be Review', 'Done'] %}
+                            {% set status_icons = {
+                            'To-Do': '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="5" />
+                            </svg>',
+                            'In Progress': '<svg width="16" height="16" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10" />
+                                <path d="M8 12l2 2 4-4" />
+                            </svg>',
+                            'To Be Review': '<svg width="16" height="16" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                <polyline points="14,2 14,8 20,8" />
+                            </svg>',
+                            'Done': '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                <polyline points="20,6 9,17 4,12" />
+                            </svg>'
+                            } %}
+                            {% for status in statuses %}
+                            <div class="kanban-column" data-status="{{ status }}">
+                                <h3 class="kanban-column-header">
+                                    {{ status_icons[status]|safe }}
+                                    {{ status }}
+                                    <span
+                                        style="margin-left: auto; background: rgba(94, 106, 210, 0.2); color: #5e6ad2; padding: 0.125rem 0.5rem; border-radius: 12px; font-size: 0.75rem; font-weight: 500;">
+                                        {{ tasks_by_status[status]|length }}
+                                    </span>
+                                </h3>
+                                {% if tasks_by_status[status] %}
+                                {% for task in tasks_by_status[status] %}
+                                {% set progress_class = 'progress-20' %}
+                                {% if task.priority is not none and task.priority == 2 %}{% set progress_class =
+                                'progress-40' %}
+                                {% elif task.priority is not none and task.priority == 3 %}{% set progress_class =
+                                'progress-60' %}
+                                {% elif task.priority is not none and task.priority == 4 %}{% set progress_class =
+                                'progress-80' %}
+                                {% elif task.priority is not none and task.priority >= 5 %}{% set progress_class =
+                                'progress-100' %}
+                                {% endif %}
+                                {% set project_color = project_color_map[task.project.id] if task.project and
+                                task.project.id in project_color_map else '#6366f1' %}
+                                <div class="kanban-card" data-task-id="{{ task.id }}" data-task-title="{{ task.title }}"
+                                    data-task-description="{{ task.description or 'No description.' }}"
+                                    data-task-project="{{ task.project.name if task.project else 'No project' }}"
+                                    data-task-assignee="{{ task.assignee_user.username if task.assignee_user else 'Unassigned' }}"
+                                    data-task-priority="{{ task.priority or 'Not set' }}"
+                                    data-task-due="{{ task.due_date.strftime('%Y-%m-%d') if task.due_date else 'No due date' }}"
+                                    data-task-status="{{ task.status }}" style="--project-color: {{ project_color }};">
+                                    {% if task.image_url %}
+                                    <div class="task-image">
+                                        <img src="{{ task.image_url }}" alt="Task image" />
+                                    </div>
+                                    {% else %}
+                                    <div class="task-image-placeholder">
+                                        <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                            <rect x="3" y="3" width="18" height="18" rx="4" />
+                                        </svg>
+                                    </div>
+                                    {% endif %}
+                                    {% if task.project %}
+                                    <span class="task-project-tag">{{ task.project.name }}</span>
+                                    {% endif %}
+                                    <h4><a href="{{ url_for('edit_task', task_id=task.id) }}"
+                                            title="Edit {{task.title}}">{{ task.title }}</a></h4>
+                                    <p title="{{task.description}}">{{ task.description[:80] if task.description else
+                                        'No description.' }}{% if task.description and task.description|length > 80
+                                        %}...{% endif %}</p>
+                                    <div class="task-meta">
+                                        {% if task.assignee_user %}
+                                        <span class="task-assignee" title="Assignee">{{
+                                            task.assignee_user.username[0]|upper }}</span>
+                                        {% endif %}
+                                        {% if task.priority %}
+                                        <span class="task-priority">Priority {{ task.priority }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-inner {{ progress_class }}"></div>
+                                    </div>
+                                    <div class="card-footer">
+                                        <span title="Comments" class="card-footer-icon">
+                                            <svg width="16" height="16" fill="none" stroke="currentColor"
+                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                viewBox="0 0 24 24">
+                                                <path
+                                                    d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                                            </svg>
+                                            8
+                                        </span>
+                                        <span title="Attachments" class="card-footer-icon">
+                                            <svg width="16" height="16" fill="none" stroke="currentColor"
+                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                viewBox="0 0 24 24">
+                                                <path
+                                                    d="M21.44 11.05a5.5 5.5 0 0 1-7.78 7.78l-7.07-7.07a5.5 5.5 0 0 1 7.78-7.78l7.07 7.07z" />
+                                            </svg>
+                                            24
+                                        </span>
+                                        <span class="card-footer-spacer"></span>
+                                        <span class="card-footer-date">Due: {{ task.due_date.strftime('%Y-%m-%d') if
+                                            task.due_date else 'N/A' }}</span>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                                {% else %}
+                                <p class="kanban-empty-state">No tasks in this status.</p>
+                                {% endif %}
+                                <a href="{{ url_for('manage_projects') }}" class="add-task-link">+ Add Task (via
+                                    Project)</a>
+                            </div>
+                            {% endfor %}
+                        </section>
+                    </main>
+
+                    <!-- New Right Sidebar -->
+                    <aside class="right-sidebar">
+                        <!-- Task Summary Panel -->
+                        <div class="sidebar-panel">
+                            <div class="panel-header">
+                                <h3>Task Overview</h3>
+                                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                    <path d="M9 11H3v5a2 2 0 0 0 2 2h6V9a2 2 0 0 0-2-2H3" />
+                                    <path d="M21 11h-6v8a2 2 0 0 0 2 2h6V9a2 2 0 0 0-2-2h-6" />
+                                    <path d="M3 9V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2" />
+                                </svg>
+                            </div>
+                            <div class="panel-content">
+                                <div class="stats-grid">
+                                    {% set total_tasks = tasks_by_status['To-Do']|length + tasks_by_status['In
+                                    Progress']|length + tasks_by_status['To Be Review']|length +
+                                    tasks_by_status['Done']|length %}
+                                    <div class="stat-item">
+                                        <div class="stat-number">{{ tasks_by_status['To-Do']|length }}</div>
+                                        <div class="stat-label">To-Do</div>
+                                        <div class="stat-bar">
+                                            {% set todo_percent = (tasks_by_status['To-Do']|length / (total_tasks or 1)
+                                            * 100)|round(1) %}
+                                            <div class="stat-progress"
+                                                style="width: {{ todo_percent }}%; background: #f59e0b;"></div>
+                                        </div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-number">{{ tasks_by_status['In Progress']|length }}</div>
+                                        <div class="stat-label">In Progress</div>
+                                        <div class="stat-bar">
+                                            {% set progress_percent = (tasks_by_status['In Progress']|length /
+                                            (total_tasks or 1) * 100)|round(1) %}
+                                            <div class="stat-progress"
+                                                style="width: {{ progress_percent }}%; background: #3b82f6;"></div>
+                                        </div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-number">{{ tasks_by_status['To Be Review']|length }}</div>
+                                        <div class="stat-label">Review</div>
+                                        <div class="stat-bar">
+                                            {% set review_percent = (tasks_by_status['To Be Review']|length /
+                                            (total_tasks or 1) * 100)|round(1) %}
+                                            <div class="stat-progress"
+                                                style="width: {{ review_percent }}%; background: #8b5cf6;"></div>
+                                        </div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-number">{{ tasks_by_status['Done']|length }}</div>
+                                        <div class="stat-label">Done</div>
+                                        <div class="stat-bar">
+                                            {% set done_percent = (tasks_by_status['Done']|length / (total_tasks or 1) *
+                                            100)|round(1) %}
+                                            <div class="stat-progress"
+                                                style="width: {{ done_percent }}%; background: #22c55e;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Task Details Panel -->
+                        <div class="sidebar-panel">
+                            <div class="panel-header">
+                                <h3>Task Details</h3>
+                                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                    <polyline points="14,2 14,8 20,8" />
+                                    <line x1="16" y1="13" x2="8" y2="13" />
+                                    <line x1="16" y1="17" x2="8" y2="17" />
+                                    <polyline points="10,9 9,9 8,9" />
+                                </svg>
+                            </div>
+                            <div class="panel-content" id="task-details-content">
+                                <div class="empty-task-details">
+                                    <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5"
+                                        stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                        <polyline points="14,2 14,8 20,8" />
+                                        <line x1="16" y1="13" x2="8" y2="13" />
+                                        <line x1="16" y1="17" x2="8" y2="17" />
+                                        <polyline points="10,9 9,9 8,9" />
+                                    </svg>
+                                    <p>Hover over a task card to see details</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Activity Panel -->
+                        <div class="sidebar-panel">
+                            <div class="panel-header">
+                                <h3>Recent Activity</h3>
+                                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <polyline points="12,6 12,12 16,14" />
+                                </svg>
+                            </div>
+                            <div class="panel-content">
+                                <div class="activity-list">
+                                    {% set all_tasks = tasks_by_status['To-Do'] + tasks_by_status['In Progress'] +
+                                    tasks_by_status['To Be Review'] + tasks_by_status['Done'] %}
+                                    {% set sorted_tasks = all_tasks|sort(attribute='updated_at', reverse=true) %}
+                                    {% for task in sorted_tasks %}
+                                    {% if loop.index <= 5 %} <div class="activity-item">
+                                        <div class="activity-icon status-{{ task.status|replace(' ', '-')|lower }}">
+                                            {% if task.status == 'Done' %}
+                                            <svg width="14" height="14" fill="none" stroke="currentColor"
+                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                viewBox="0 0 24 24">
+                                                <polyline points="20,6 9,17 4,12" />
+                                            </svg>
+                                            {% elif task.status == 'In Progress' %}
+                                            <svg width="14" height="14" fill="none" stroke="currentColor"
+                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                viewBox="0 0 24 24">
+                                                <circle cx="12" cy="12" r="10" />
+                                                <path d="M8 12l2 2 4-4" />
+                                            </svg>
+                                            {% else %}
+                                            <svg width="14" height="14" fill="none" stroke="currentColor"
+                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                viewBox="0 0 24 24">
+                                                <circle cx="12" cy="12" r="5" />
+                                            </svg>
+                                            {% endif %}
+                                        </div>
+                                        <div class="activity-content">
+                                            <div class="activity-text">
+                                                <strong>{{ task.title }}</strong> moved to {{ task.status }}
+                                            </div>
+                                            <div class="activity-meta">
+                                                <span>{{ task.project.name if task.project else 'No project' }}</span>
+                                                <span>•</span>
+                                                <span>{{ task.updated_at.strftime('%m/%d') if task.updated_at else
+                                                    task.created_at.strftime('%m/%d') }}</span>
+                                            </div>
+                                        </div>
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                                {% if not all_tasks %}
+                                <div class="empty-activity">
+                                    <p>No recent activity</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                </div>
+
+                <!-- Quick Actions Panel -->
+                <div class="sidebar-panel">
+                    <div class="panel-header">
+                        <h3>Quick Actions</h3>
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="3" />
+                            <path
+                                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                        </svg>
+                    </div>
+                    <div class="panel-content">
+                        <div class="quick-actions">
+                            <a href="{{ url_for('manage_projects') }}" class="quick-action-btn">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <line x1="12" y1="8" x2="12" y2="16" />
+                                    <line x1="8" y1="12" x2="16" y2="12" />
+                                </svg>
+                                New Project
+                            </a>
+                            <a href="{{ url_for('calendar_view') }}" class="quick-action-btn">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                                    <line x1="16" y1="2" x2="16" y2="6" />
+                                    <line x1="8" y1="2" x2="8" y2="6" />
+                                    <line x1="3" y1="10" x2="21" y2="10" />
+                                </svg>
+                                Calendar
+                            </a>
+                            <a href="{{ url_for('timeline_view') }}" class="quick-action-btn">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                    <line x1="12" y1="2" x2="12" y2="22" />
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                                </svg>
+                                Timeline
+                            </a>
+                            <a href="{{ url_for('overview_view') }}" class="quick-action-btn">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                    <path d="M9 11H3v5a2 2 0 0 0 2 2h6V9a2 2 0 0 0-2-2H3" />
+                                    <path d="M21 11h-6v8a2 2 0 0 0 2 2h6V9a2 2 0 0 0-2-2h-6" />
+                                    <path d="M3 9V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2" />
+                                </svg>
+                                Reports
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                </aside>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const columns = document.querySelectorAll('.kanban-column');
+            columns.forEach(column => {
+                new Sortable(column, {
+                    group: 'shared', // set both lists to same group
+                    animation: 150,
+                    ghostClass: 'blue-background-class', // Class name for the drop placeholder
+                    draggable: '.kanban-card', // Specifies which items inside the element should be draggable
+                    onEnd: function (evt) {
+                        const itemEl = evt.item;  // dragged HTMLElement
+                        const toColumnEl = evt.to;  // target list
+                        const newStatus = toColumnEl.dataset.status; // Get status from data attribute
+                        const taskId = itemEl.dataset.taskId; // We'll need to add data-task-id to cards
+
+                        // console.log(`Task ID: ${taskId}, New Status: ${newStatus}`);
+
+                        if (taskId && newStatus) {
+                            fetch('/task/update_status', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    // Include CSRF token if/when you implement CSRF protection for AJAX
+                                },
+                                body: JSON.stringify({ task_id: taskId, new_status: newStatus })
+                            })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        // console.log('Task status updated successfully');
+                                        // Optionally, provide visual feedback or refresh part of the page
+                                    } else {
+                                        // console.error('Failed to update task status:', data.message);
+                                        // Revert the drag operation visually if the backend update fails
+                                        // This can be complex; for now, we rely on the user to see the error via flash or console
+                                        alert('Error updating task: ' + data.message);
+                                        // A simple way to revert (might not be perfect for all cases):
+                                        // evt.from.appendChild(itemEl);
+                                    }
+                                })
+                                .catch(error => {
+                                    // console.error('Error in fetch operation:', error);
+                                    alert('Network error or server issue while updating task.');
+                                    // evt.from.appendChild(itemEl);
+                                });
+                        }
+                    }
+                });
+            });
+
+            // Task hover functionality for details panel
+            const taskCards = document.querySelectorAll('.kanban-card');
+            const taskDetailsContent = document.getElementById('task-details-content');
+
+            taskCards.forEach(card => {
+                card.addEventListener('mouseenter', function () {
+                    const taskData = {
+                        title: this.dataset.taskTitle,
+                        description: this.dataset.taskDescription,
+                        project: this.dataset.taskProject,
+                        assignee: this.dataset.taskAssignee,
+                        priority: this.dataset.taskPriority,
+                        due: this.dataset.taskDue,
+                        status: this.dataset.taskStatus
+                    };
+
+                    showTaskDetails(taskData);
+                });
+
+                card.addEventListener('mouseleave', function () {
+                    hideTaskDetails();
+                });
+            });
+
+            function showTaskDetails(task) {
+                const priorityColor = task.priority === 'Not set' ? '#6b7280' :
+                    parseInt(task.priority) >= 4 ? '#ef4444' :
+                        parseInt(task.priority) >= 3 ? '#f59e0b' : '#22c55e';
+
+                taskDetailsContent.innerHTML = `
+            <div class="task-detail-content">
+                <div class="task-detail-header">
+                    <h4>${task.title}</h4>
+                    <span class="task-status-badge status-${task.status.replace(/\s+/g, '-').toLowerCase()}">${task.status}</span>
+                </div>
+                <div class="task-detail-body">
+                    <p class="task-description">${task.description}</p>
+                    <div class="task-detail-grid">
+                        <div class="detail-item">
+                            <label>Project</label>
+                            <span>${task.project}</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Assignee</label>
+                            <span>${task.assignee}</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Priority</label>
+                            <span style="color: ${priorityColor};">${task.priority}</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Due Date</label>
+                            <span>${task.due}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+            }
+
+            function hideTaskDetails() {
+                taskDetailsContent.innerHTML = `
+            <div class="empty-task-details">
+                <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/></svg>
+                <p>Hover over a task card to see details</p>
+            </div>
+        `;
+            }
+
+            // Mobile menu toggle
+            document.getElementById('menuToggle').addEventListener('click', function () {
+                const sidebar = document.getElementById('sidebar');
+                sidebar.classList.toggle('hidden');
+            });
+
+            // User menu dropdown toggle
+            const userMenuToggle = document.getElementById('userMenuToggle');
+            const userMenu = document.getElementById('userMenu');
+            if (userMenuToggle && userMenu) {
+                userMenuToggle.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    userMenu.classList.toggle('hidden');
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function (e) {
+                    if (!userMenuToggle.contains(e.target) && !userMenu.contains(e.target)) {
+                        userMenu.classList.add('hidden');
+                    }
+                });
+
+                // Close dropdown when pressing Escape
+                document.addEventListener('keydown', function (e) {
+                    if (e.key === 'Escape') {
+                        userMenu.classList.add('hidden');
+                    }
+                });
+            }
+
+            // Enhanced button interactions
+            const buttons = document.querySelectorAll('.quick-action-btn, .nav-icon, .add-task-link');
+            buttons.forEach(function (btn) {
+                btn.addEventListener('mouseenter', function () {
+                    this.style.transform = 'translateY(-1px)';
+                });
+
+                btn.addEventListener('mouseleave', function () {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+
+            // Animate progress bars on load
+            const progressBars = document.querySelectorAll('.progress-inner');
+            progressBars.forEach(function (bar) {
+                const originalWidth = bar.style.width || getComputedStyle(bar).width;
+                bar.style.width = '0%';
+                setTimeout(function () {
+                    bar.style.width = originalWidth;
+                }, 300);
+            });
+
+            // Animate stat progress bars
+            const statProgressBars = document.querySelectorAll('.stat-progress');
+            statProgressBars.forEach(function (bar) {
+                const originalWidth = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(function () {
+                    bar.style.width = originalWidth;
+                }, 500);
+            });
+
+            // Add hover effects to kanban cards
+            const kanbanCards = document.querySelectorAll('.kanban-card');
+            kanbanCards.forEach(function (card) {
+                card.addEventListener('mouseenter', function () {
+                    this.style.transform = 'translateY(-4px)';
+                });
+
+                card.addEventListener('mouseleave', function () {
+                    this.style.transform = 'translateY(-2px)';
+                });
+            });
+
+            // Add hover effects to sidebar panels
+            const sidebarPanels = document.querySelectorAll('.sidebar-panel');
+            sidebarPanels.forEach(function (panel) {
+                panel.addEventListener('mouseenter', function () {
+                    this.style.transform = 'translateY(-4px)';
+                });
+
+                panel.addEventListener('mouseleave', function () {
+                    this.style.transform = 'translateY(-2px)';
+                });
+            });
+
+            // Animate stats on load
+            const statNumbers = document.querySelectorAll('.stat-number');
+            statNumbers.forEach(function (stat) {
+                const finalValue = parseInt(stat.textContent);
+                if (finalValue > 0) {
+                    let currentValue = 0;
+                    const increment = Math.ceil(finalValue / 20);
+
+                    const timer = setInterval(function () {
+                        currentValue += increment;
+                        if (currentValue >= finalValue) {
+                            currentValue = finalValue;
+                            clearInterval(timer);
+                        }
+                        stat.textContent = currentValue;
+                    }, 50);
+                }
+            });
+        });
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Notifications</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        aura: {
+                            bg: '#0d0e10',
+                            card: '#13141a',
+                            border: '#1f2023',
+                            accent: '#5e6ad2',
+                            purple: '#8b5cf6',
+                            text: '#b4bcd0',
+                            muted: '#7c8794',
+                            darker: '#070707',
+                            lighter: '#1a1a1a'
+                        }
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .notifications-page {
+            padding: 20px;
+        }
+        .notification-item {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-left: 5px solid #007bff; /* Blue left border */
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            display: flex; /* For aligning content and button */
+            justify-content: space-between; /* Pushes button to the right */
+            align-items: center; /* Vertically aligns items */
+        }
+        .notification-item.is-read {
+            border-left-color: #ccc; /* Lighter border for read notifications */
+            background-color: #f9f9f9;
+        }
+        .notification-item p {
+            margin: 0 0 5px 0;
+        }
+        .notification-item small {
+            color: #777;
+        }
+        .notification-item a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .notification-item a:hover {
+            text-decoration: underline;
+        }
+        .no-notifications {
+            text-align: center;
+            color: #777;
+            padding: 30px;
+            font-style: italic;
+        }
+
+        .notification-content {
+            flex-grow: 1; /* Allows content to take available space */
+        }
+
+        .mark-read-form {
+            margin-left: 15px; /* Space between content and button */
+        }
+
+        .btn-mark-read {
+            padding: 5px 10px;
+            font-size: 0.8em;
+            background-color: #28a745; /* Green */
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .btn-mark-read:hover {
+            background-color: #218838; /* Darker green */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo-placeholder">Logo</div>
+            <nav class="menu-icons">
+                <div>Icon 1</div>
+                <div>Icon 2</div>
+                <div>Icon 3</div>
+                <div>Icon 4</div>
+                <div>Icon 5</div>
+                <div>Icon 6</div>
+                <div>Icon 7</div>
+            </nav>
+            <section class="projects-section">
+                <h2>My Projects</h2>
+                {% if user_projects %}
+                    <ul>
+                        {% for project in user_projects %}
+                            <li><a href="{{ url_for('view_tasks', project_id=project.id) }}">{{ project.name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No projects yet.</p>
+                {% endif %}
+                <a href="{{ url_for('manage_projects') }}" class="add-project-btn-sidebar" style="display: block; text-align: center; padding: 10px; background-color: #b0b0b0; border: 1px solid #999; text-decoration: none; color: #333; margin-top:10px; border-radius:3px;">Manage Projects</a>
+            </section>
+            <section class="team-section">
+                <h2>Team Members</h2>
+                {% if all_users %}
+                    <ul>
+                        {% for user_profile in all_users %}
+                            <li>{{ user_profile.username }} <small style="color: green;">(Online)</small></li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No users found.</p>
+                {% endif %}
+            </section>
+            <div class="settings-icon">Settings</div>
+            <div class="chat-icon">Chat</div>
+            <a href="{{ url_for('logout') }}" class="logout-icon" style="padding: 10px; margin-bottom: 5px; background-color: #d0d0d0; border: 1px dashed #999; text-align: center; text-decoration:none; color: #333; margin-top: auto;">Logout</a>
+        </aside>
+        <main class="main-content">
+            {% include 'header.html' %}
+            <div class="notifications-page">
+                <h1>My Notifications</h1>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                {% if notifications %}
+                    {% for notification in notifications %}
+                        <div class="notification-item {{ 'is-read' if notification.is_read else '' }}">
+                            <div class="notification-content">
+                                <p>
+                                    {% if notification.related_url %}
+                                        <a href="{{ notification.related_url }}">{{ notification.message }}</a>
+                                    {% else %}
+                                        {{ notification.message }}
+                                    {% endif %}
+                                </p>
+                                <small>{{ notification.timestamp.strftime('%Y-%m-%d %H:%M:%S') }} UTC</small>
+                            </div>
+                            {% if not notification.is_read %}
+                                <form method="POST" action="{{ url_for('mark_notification_as_read', notification_id=notification.id) }}" class="mark-read-form">
+                                    <button type="submit" class="btn-mark-read">Mark as Read</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="no-notifications">You have no notifications.</p>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+</body>
+</html> 

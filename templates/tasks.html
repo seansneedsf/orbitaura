@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ project.name }} - Project Details</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        aura: {
+                            bg: '#0d0e10',
+                            card: '#13141a',
+                            border: '#1f2023',
+                            accent: '#5e6ad2',
+                            purple: '#8b5cf6',
+                            text: '#b4bcd0',
+                            muted: '#7c8794',
+                            darker: '#070707',
+                            lighter: '#1a1a1a'
+                        }
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-effect {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .aura-card {
+            background: linear-gradient(135deg,
+                    rgba(19, 20, 26, 0.9) 0%,
+                    rgba(31, 32, 35, 0.5) 100%);
+            border: 1px solid rgba(31, 32, 35, 0.8);
+        }
+
+        .aura-card-active {
+            background: linear-gradient(135deg,
+                    rgba(94, 106, 210, 0.1) 0%,
+                    rgba(19, 20, 26, 0.95) 30%);
+            border: 1px solid rgba(94, 106, 210, 0.3);
+        }
+
+        .header-card {
+            background: linear-gradient(135deg,
+                    rgba(19, 20, 26, 0.95) 0%,
+                    rgba(31, 32, 35, 0.8) 100%);
+            border: 1px solid rgba(31, 32, 35, 0.8);
+        }
+
+        .nav-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(31, 32, 35, 0.8);
+            border: 1px solid rgba(94, 106, 210, 0.2);
+            transition: all 0.2s ease;
+            font-size: 12px;
+        }
+
+        .nav-icon:hover {
+            background: rgba(94, 106, 210, 0.1);
+            border-color: rgba(94, 106, 210, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .stat-divider {
+            width: 1px;
+            background: linear-gradient(180deg, transparent, rgba(94, 106, 210, 0.3) 50%, transparent);
+            height: 20px;
+        }
+
+        .overview-card {
+            background: linear-gradient(135deg,
+                    rgba(19, 20, 26, 0.9) 0%,
+                    rgba(31, 32, 35, 0.5) 100%);
+            border: 1px solid rgba(31, 32, 35, 0.8);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .overview-card:hover {
+            border-color: rgba(94, 106, 210, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            padding: 1.25rem 1.5rem 1rem;
+            border-bottom: 1px solid rgba(31, 32, 35, 0.8);
+        }
+
+        .card-header h2 {
+            color: #ffffff;
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        .task-card {
+            background: linear-gradient(135deg,
+                    rgba(19, 20, 26, 0.9) 0%,
+                    rgba(31, 32, 35, 0.5) 100%);
+            border: 1px solid rgba(31, 32, 35, 0.8);
+            border-radius: 8px;
+            padding: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .task-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            border-color: rgba(94, 106, 210, 0.4);
+        }
+
+        .task-actions {
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .task-card:hover .task-actions {
+            opacity: 1;
+        }
+
+        .btn {
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            cursor: pointer;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.7rem;
+        }
+
+        .btn-primary {
+            background: rgba(94, 106, 210, 0.1);
+            color: #5e6ad2;
+            border-color: rgba(94, 106, 210, 0.2);
+        }
+
+        .btn-primary:hover {
+            background: rgba(94, 106, 210, 0.2);
+            border-color: rgba(94, 106, 210, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(107, 114, 128, 0.1);
+            color: #6b7280;
+            border-color: rgba(107, 114, 128, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(107, 114, 128, 0.2);
+            border-color: rgba(107, 114, 128, 0.4);
+        }
+
+        .btn-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+            border-color: rgba(245, 158, 11, 0.2);
+        }
+
+        .btn-warning:hover {
+            background: rgba(245, 158, 11, 0.2);
+            border-color: rgba(245, 158, 11, 0.4);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .btn-success:hover {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: rgba(16, 185, 129, 0.4);
+        }
+
+        .status-badge {
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            border: 1px solid transparent;
+        }
+
+        .progress-circle {
+            position: relative;
+            width: 80px;
+            height: 80px;
+        }
+
+        .progress-circle svg {
+            transform: rotate(-90deg);
+        }
+
+        .progress-number {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-weight: 700;
+            font-size: 1.125rem;
+            color: #ffffff;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #7c8794;
+        }
+
+        .empty-state svg {
+            margin: 0 auto 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: #b4bcd0;
+        }
+
+        .empty-state small {
+            font-size: 0.875rem;
+            opacity: 0.8;
+        }
+
+        .flash-messages {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            z-index: 50;
+        }
+
+        .flash-messages li {
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            border: 1px solid transparent;
+            background: rgba(19, 20, 26, 0.95);
+            color: #b4bcd0;
+            border-color: rgba(31, 32, 35, 0.8);
+        }
+
+        .flash-messages .success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .flash-messages .danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .flash-messages .warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+            border-color: rgba(245, 158, 11, 0.2);
+        }
+
+        .flash-messages .info {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+            border-color: rgba(59, 130, 246, 0.2);
+        }
+
+        .task-column {
+            min-width: 280px;
+            max-width: 320px;
+        }
+
+        .kanban-board {
+            display: flex;
+            gap: 1.5rem;
+            overflow-x: auto;
+            padding-bottom: 1rem;
+        }
+
+        .assignee-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #5e6ad2;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .project-owner-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #5e6ad2;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .kanban-board {
+                flex-direction: column;
+            }
+
+            .task-column {
+                min-width: 100%;
+                max-width: 100%;
+            }
+
+            .header-stats {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .project-header-content {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-aura-bg text-aura-text font-inter min-h-screen">
+
+    <div class="flex flex-col md:flex-row h-screen">
+        <!-- Mobile header -->
+        <header class="md:hidden bg-darker p-4 flex justify-between items-center border-b border-lighter">
+            <div class="flex items-center space-x-2">
+                <div class="h-6 w-6 rounded-md bg-accent"></div>
+                <span class="font-medium">{{ project.name }}</span>
+            </div>
+            <button id="menuToggle" class="text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16">
+                    </path>
+                </svg>
+            </button>
+        </header>
+
+        <!-- Sidebar -->
+        <div id="sidebar"
+            class="hidden md:block w-full md:w-64 header-card flex-shrink-0 flex flex-col h-screen md:h-auto overflow-y-auto">
+            <div class="p-4 md:block hidden">
+                <div class="flex items-center space-x-2">
+                    <div class="h-6 w-6 rounded-md bg-accent"></div>
+                    <span class="font-medium">Workspace</span>
+                </div>
+            </div>
+
+            <nav class="flex-1 py-4">
+                <div class="px-3 mb-2 text-xs font-medium text-muted">WORKSPACE</div>
+                <a href="{{ url_for('overview_view') }}"
+                    class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
+                        </path>
+                    </svg>
+                    Home
+                </a>
+                <a href="{{ url_for('index') }}"
+                    class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01">
+                        </path>
+                    </svg>
+                    Issues
+                </a>
+                <a href="{{ url_for('manage_projects') }}"
+                    class="flex items-center px-3 py-2 text-sm text-white bg-aura-purple rounded-md mx-2 mt-1">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 7h5l2 3h11v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" />
+                    </svg>
+                    Projects
+                </a>
+                <a href="{{ url_for('calendar_view') }}"
+                    class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                        </path>
+                    </svg>
+                    Analytics
+                </a>
+                <a href="{{ url_for('timeline_view') }}"
+                    class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z">
+                        </path>
+                    </svg>
+                    Timeline
+                </a>
+
+                <div class="px-3 mt-6 mb-2 text-xs font-medium text-muted">TEAMS</div>
+                <a href="#"
+                    class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2">
+                    <div class="w-4 h-4 rounded-sm bg-purple-500 mr-3"></div>
+                    Design
+                </a>
+                <a href="#"
+                    class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <div class="w-4 h-4 rounded-sm bg-blue-500 mr-3"></div>
+                    Engineering
+                </a>
+                <a href="#"
+                    class="flex items-center px-3 py-2 text-sm text-muted hover:text-white hover:bg-lighter rounded-md mx-2 mt-1">
+                    <div class="w-4 h-4 rounded-sm bg-green-500 mr-3"></div>
+                    Product
+                </a>
+            </nav>
+
+            <div class="p-4 border-t border-aura-border">
+                <div class="flex items-center">
+                    <div class="w-8 h-8 rounded-full bg-accent flex items-center justify-center">
+                        <span class="text-sm font-medium">JS</span>
+                    </div>
+                    <div class="ml-2">
+                        <div class="text-sm font-medium">John Smith</div>
+                        <div class="text-xs text-muted">My Workspace</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="flex-1 flex flex-col overflow-y-auto">
+            <!-- Project Header -->
+            <div class="max-w-7xl mx-auto p-8 w-full">
+                <div class="header-card glass-effect rounded-2xl p-8 mb-8">
+                    <!-- Project Header Content -->
+                    <div class="project-header-content flex items-start justify-between mb-6">
+                        <div>
+                            <h1 class="text-3xl font-semibold text-white mb-1 flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-aura-accent/20 flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-aura-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h5l2 3h11v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" />
+                                    </svg>
+                                </div>
+                                {{ project.name }}
+                            </h1>
+                            <p class="text-aura-muted">{{ project.description if project.description else 'No description available for this project.' }}</p>
+                        </div>
+
+                        <!-- Navigation Icons -->
+                        <div class="flex items-center gap-3">
+                            <a href="{{ url_for('manage_projects') }}" class="nav-icon text-aura-text hover:text-white" title="All Projects">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h5l2 3h11v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" />
+                                </svg>
+                            </a>
+                            <a href="{{ url_for('edit_project', project_id=project.id) }}" class="nav-icon text-aura-text hover:text-white" title="Edit Project">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                                </svg>
+                            </a>
+                            <a href="{{ url_for('add_task', project_id=project.id) }}" class="nav-icon text-aura-text hover:text-white" title="Add Task">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m4-4H8" />
+                                </svg>
+                            </a>
+                            <a href="{{ url_for('overview_view') }}" class="nav-icon text-aura-text hover:text-white" title="Dashboard">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Project Stats Row -->
+                    <div class="header-stats flex items-center justify-between">
+                        <div class="flex items-center gap-8">
+                            <!-- Progress Circle -->
+                            <div class="flex items-center gap-4">
+                                <div class="progress-circle">
+                                    <svg width="80" height="80">
+                                        <circle cx="40" cy="40" r="32" stroke="rgba(31, 32, 35, 0.8)" stroke-width="6" fill="none"/>
+                                        <circle cx="40" cy="40" r="32" stroke="#5e6ad2" stroke-width="6" fill="none"
+                                                stroke-dasharray="{{ (completion_percentage / 100 * 201)|round(2) }} 201" stroke-linecap="round"/>
+                                    </svg>
+                                    <div class="progress-number">{{ completion_percentage }}%</div>
+                                </div>
+                                <div>
+                                    <div class="text-lg font-semibold text-white">{{ tasks_by_status['Done']|length }} / {{ project.tasks|length }}</div>
+                                    <div class="text-sm text-aura-muted">Tasks Complete</div>
+                                </div>
+                            </div>
+                            <div class="stat-divider"></div>
+
+                            <!-- Project Meta -->
+                            <div class="flex items-center gap-6">
+                                <div class="text-center">
+                                    <div class="text-lg font-semibold text-white">{{ project.tasks|length }}</div>
+                                    <div class="text-xs text-aura-muted uppercase tracking-wider">Total Tasks</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-lg font-semibold text-white">{{ tasks_by_status['In Progress']|length }}</div>
+                                    <div class="text-xs text-aura-muted uppercase tracking-wider">In Progress</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-lg font-semibold text-white">{{ tasks_by_status['To Be Review']|length }}</div>
+                                    <div class="text-xs text-aura-muted uppercase tracking-wider">Review</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Project Owner -->
+                        <div class="flex items-center gap-3">
+                            <div class="project-owner-avatar">{{ project.owner_user.username[0]|upper }}</div>
+                            <div>
+                                <div class="text-sm font-medium text-white">{{ project.owner_user.username }}</div>
+                                <div class="text-xs text-aura-muted">Project Owner</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="flex items-center gap-3 mt-6 pt-6 border-t border-aura-border">
+                        <span class="text-xs text-aura-muted">Quick Actions:</span>
+                        <a href="{{ url_for('add_task', project_id=project.id) }}" class="btn btn-primary">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                <path d="M12 8v8m4-4H8" />
+                            </svg>
+                            Add Task
+                        </a>
+                        <a href="{{ url_for('edit_project', project_id=project.id) }}" class="btn btn-warning">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                            </svg>
+                            Edit Project
+                        </a>
+                        {% if project.tasks|length > 0 and project.tasks|selectattr('status', 'ne', 'Done')|list|length == 0 %}
+                        <form method="POST" action="{{ url_for('archive_project', project_id=project.id) }}" style="display: inline;">
+                            <button type="submit" class="btn btn-secondary">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                    <polyline points="21,8 21,21 3,21 3,8"/>
+                                    <rect x="1" y="3" width="22" height="5"/>
+                                    <line x1="10" y1="12" x2="14" y2="12"/>
+                                </svg>
+                                Archive Project
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Kanban Board -->
+                <div class="kanban-board">
+                    {% for status in ['To-Do', 'In Progress', 'To Be Review', 'Done'] %}
+                    <div class="task-column">
+                        <div class="overview-card">
+                            <div class="card-header">
+                                <h2>
+                                    {% if status == 'To-Do' %}
+                                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                        <circle cx="12" cy="12" r="10"/>
+                                    </svg>
+                                    {% elif status == 'In Progress' %}
+                                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                        <path d="M12 2v20m8-10H4"/>
+                                    </svg>
+                                    {% elif status == 'To Be Review' %}
+                                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                    {% else %}
+                                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                        <path d="M20 6L9 17l-5-5" />
+                                    </svg>
+                                    {% endif %}
+                                    {{ status }}
+                                    <span class="status-badge bg-aura-border text-aura-muted border border-aura-border ml-auto">
+                                        {{ tasks_by_status[status]|length }}
+                                    </span>
+                                </h2>
+                            </div>
+                            <div class="card-content" style="max-height: 600px; overflow-y: auto;">
+                                {% if tasks_by_status[status] %}
+                                <div class="space-y-3">
+                                    {% for task in tasks_by_status[status] %}
+                                    <div class="task-card" onclick="window.location.href='{{ url_for('edit_task', task_id=task.id) }}';">
+                                        <div class="flex justify-between items-start mb-2">
+                                            <h4 class="font-semibold text-white text-sm leading-tight">{{ task.title }}</h4>
+                                            <div class="task-menu opacity-60 cursor-pointer p-1" onclick="event.stopPropagation();">
+                                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                                    <circle cx="12" cy="12" r="1"/>
+                                                    <circle cx="12" cy="5" r="1"/>
+                                                    <circle cx="12" cy="19" r="1"/>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        
+                                        {% if task.description %}
+                                        <p class="text-aura-text text-xs leading-relaxed mb-3">
+                                            {{ task.description[:100] }}{% if task.description|length > 100 %}...{% endif %}
+                                        </p>
+                                        {% endif %}
+
+                                        <div class="flex justify-between items-center mb-3">
+                                            <div class="flex items-center gap-2">
+                                                {% if task.assignee_user %}
+                                                <div class="assignee-avatar">{{ task.assignee_user.username[0]|upper }}</div>
+                                                <span class="text-xs text-aura-muted">{{ task.assignee_user.username }}</span>
+                                                {% else %}
+                                                <div class="assignee-avatar bg-aura-border">
+                                                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                                        <circle cx="12" cy="7" r="4"/>
+                                                    </svg>
+                                                </div>
+                                                <span class="text-xs text-aura-muted">Unassigned</span>
+                                                {% endif %}
+                                            </div>
+                                            {% if task.due_date %}
+                                            <div class="flex items-center gap-1 text-xs text-aura-muted">
+                                                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                                    <line x1="16" y1="2" x2="16" y2="6"/>
+                                                    <line x1="8" y1="2" x2="8" y2="6"/>
+                                                    <line x1="3" y1="10" x2="21" y2="10"/>
+                                                </svg>
+                                                {{ task.due_date.strftime('%b %d') }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+
+                                        <div class="task-actions flex gap-2">
+                                            <a href="{{ url_for('edit_task', task_id=task.id) }}" class="btn btn-sm btn-secondary" onclick="event.stopPropagation();">
+                                                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                                    <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                                                </svg>
+                                                Edit
+                                            </a>
+                                            <form method="POST" action="{{ url_for('delete_task', task_id=task.id) }}" style="display: inline;" 
+                                                  onsubmit="event.stopPropagation(); return confirm('Are you sure you want to delete this task?');">
+                                                <button type="submit" class="btn btn-sm btn-danger">
+                                                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                                        <polyline points="3,6 5,6 21,6"/>
+                                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                                    </svg>
+                                                    Delete
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% else %}
+                                <div class="empty-state">
+                                    <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                        <circle cx="12" cy="12" r="10"/>
+                                    </svg>
+                                    <p>No {{ status.lower() }} tasks</p>
+                                    <small>Tasks will appear here when they match this status</small>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <ul class="flash-messages">
+                {% for category, message in messages %}
+                <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Enhanced task card interactions
+            const taskCards = document.querySelectorAll('.task-card');
+            taskCards.forEach(function (card) {
+                card.addEventListener('mouseenter', function () {
+                    this.style.transform = 'translateY(-4px)';
+                });
+
+                card.addEventListener('mouseleave', function () {
+                    this.style.transform = 'translateY(-2px)';
+                });
+            });
+
+            // Auto-hide flash messages
+            const flashMessages = document.querySelectorAll('.flash-messages li');
+            flashMessages.forEach(function (message) {
+                setTimeout(function () {
+                    message.style.opacity = '0';
+                    message.style.transform = 'translateX(100%)';
+                    setTimeout(function () {
+                        message.remove();
+                    }, 300);
+                }, 5000);
+            });
+
+            // Enhanced hover effects for buttons
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(function (btn) {
+                btn.addEventListener('mouseenter', function () {
+                    this.style.transform = 'translateY(-1px)';
+                });
+
+                btn.addEventListener('mouseleave', function () {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+
+            // Animate progress circle
+            const progressCircle = document.querySelector('circle[stroke="#5e6ad2"]');
+            if (progressCircle) {
+                const targetDasharray = progressCircle.getAttribute('stroke-dasharray');
+                progressCircle.setAttribute('stroke-dasharray', '0 201');
+                setTimeout(function () {
+                    progressCircle.style.transition = 'stroke-dasharray 1.5s ease-out';
+                    progressCircle.setAttribute('stroke-dasharray', targetDasharray);
+                }, 500);
+            }
+
+            // Mobile menu toggle
+            document.getElementById('menuToggle').addEventListener('click', function () {
+                const sidebar = document.getElementById('sidebar');
+                sidebar.classList.toggle('hidden');
+            });
+        });
+    </script>
+</body>
+
+</html> 

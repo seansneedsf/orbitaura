@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Task - {{ project.name }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        aura: {
+                            bg: '#0d0e10',
+                            card: '#13141a',
+                            border: '#1f2023',
+                            accent: '#5e6ad2',
+                            purple: '#8b5cf6',
+                            text: '#b4bcd0',
+                            muted: '#7c8794',
+                            darker: '#070707',
+                            lighter: '#1a1a1a'
+                        }
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-effect {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .task-card {
+            background: linear-gradient(135deg,
+                    rgba(19, 20, 26, 0.95) 0%,
+                    rgba(31, 32, 35, 0.9) 100%);
+            border: 1px solid rgba(31, 32, 35, 0.8);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 1px solid rgba(31, 32, 35, 0.8);
+            border-radius: 8px;
+            background: rgba(31, 32, 35, 0.5);
+            color: #ffffff;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: rgba(94, 106, 210, 0.4);
+            box-shadow: 0 0 0 3px rgba(94, 106, 210, 0.1);
+            background: rgba(31, 32, 35, 0.7);
+        }
+
+        .form-control::placeholder {
+            color: #7c8794;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            padding: 0.875rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #5e6ad2, #8b5cf6);
+            color: white;
+            border-color: #5e6ad2;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #4c51bf, #7c3aed);
+            border-color: #4c51bf;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(94, 106, 210, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(31, 32, 35, 0.8);
+            color: #b4bcd0;
+            border-color: rgba(31, 32, 35, 0.8);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(31, 32, 35, 1);
+            border-color: rgba(94, 106, 210, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        /* Status Select Enhancement */
+        .status-select {
+            position: relative;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            position: absolute;
+            left: 0.875rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+        }
+
+        .status-select select {
+            padding-left: 2.5rem;
+        }
+
+        .status-todo { background: #6b7280; }
+        .status-progress { background: #3b82f6; }
+        .status-review { background: #f59e0b; }
+        .status-done { background: #10b981; }
+
+        /* Assignee Enhancement */
+        .assignee-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .assignee-avatar {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--user-color, #5e6ad2);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        /* Flash Messages */
+        .flash-messages {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 1.5rem 0;
+        }
+
+        .flash-messages li {
+            padding: 0.875rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            border: 1px solid transparent;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .flash-messages .success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .flash-messages .danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .flash-messages .warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+            border-color: rgba(245, 158, 11, 0.2);
+        }
+
+        .flash-messages .info {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+            border-color: rgba(59, 130, 246, 0.2);
+        }
+
+        /* Background Pattern */
+        .task-background {
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(94, 106, 210, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                #0d0e10;
+        }
+
+        /* Header Card */
+        .header-card {
+            background: linear-gradient(135deg,
+                    rgba(19, 20, 26, 0.95) 0%,
+                    rgba(31, 32, 35, 0.8) 100%);
+            border: 1px solid rgba(31, 32, 35, 0.8);
+        }
+
+        /* Back Button Enhancement */
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(31, 32, 35, 0.8);
+            color: #b4bcd0;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(31, 32, 35, 0.8);
+        }
+
+        .back-button:hover {
+            background: rgba(31, 32, 35, 1);
+            border-color: rgba(94, 106, 210, 0.3);
+            color: #ffffff;
+            transform: translateY(-1px);
+        }
+
+        /* Project Badge */
+        .project-badge {
+            background: linear-gradient(135deg, rgba(94, 106, 210, 0.2), rgba(139, 92, 246, 0.2));
+            color: #8b5cf6;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        /* Form Enhancement */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .form-grid.two-column {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        /* Task Icon */
+        .task-icon {
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+
+        /* Form Animation */
+        .task-card {
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Character Counter */
+        .char-counter {
+            font-size: 0.75rem;
+            color: #7c8794;
+            margin-top: 0.25rem;
+            text-align: right;
+        }
+
+        .char-counter.warning {
+            color: #f59e0b;
+        }
+
+        .char-counter.error {
+            color: #ef4444;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .task-card {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+
+            .form-grid.two-column {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-aura-bg text-aura-text font-inter min-h-screen task-background">
+    <div class="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-3xl mx-auto">
+            <!-- Header Section -->
+            <div class="mb-8">
+                <div class="header-card glass-effect rounded-2xl p-6">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div class="flex items-start gap-4">
+                            <div class="bg-aura-accent/20 p-3 rounded-xl task-icon">
+                                <svg class="w-6 h-6 text-aura-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <h1 class="text-2xl font-semibold text-white">Add New Task</h1>
+                                    <span class="project-badge">{{ project.name }}</span>
+                                </div>
+                                <p class="text-aura-muted">Create a new task for this project and assign it to team members</p>
+                            </div>
+                        </div>
+                        <a href="{{ url_for('view_tasks', project_id=project.id) }}" class="back-button">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                            Back to Tasks
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Task Creation Form -->
+            <div class="task-card glass-effect rounded-2xl p-8">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                <ul class="flash-messages">
+                    {% for category, message in messages %}
+                    <li class="{{ category }}">
+                        {% if category == 'success' %}
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        {% elif category == 'danger' %}
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        {% elif category == 'warning' %}
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.664-.833-2.464 0L5.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                        </svg>
+                        {% else %}
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {% endif %}
+                        {{ message }}
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                {% endwith %}
+
+                <form method="POST" action="{{ url_for('add_task', project_id=project.id) }}" id="taskForm">
+                    <div class="form-grid">
+                        <!-- Task Title -->
+                        <div class="form-group">
+                            <label for="title" class="form-label">
+                                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                </svg>
+                                Task Title
+                            </label>
+                            <input type="text" id="title" name="title" class="form-control" 
+                                   placeholder="Enter a clear and descriptive task title" required>
+                            <div class="char-counter" id="titleCounter">0 / 100 characters</div>
+                        </div>
+
+                        <!-- Task Description -->
+                        <div class="form-group">
+                            <label for="description" class="form-label">
+                                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Description (Optional)
+                            </label>
+                            <textarea id="description" name="description" class="form-control" 
+                                      placeholder="Provide additional details about the task, requirements, or context..."></textarea>
+                            <div class="char-counter" id="descCounter">0 / 500 characters</div>
+                        </div>
+                    </div>
+
+                    <div class="form-grid two-column">
+                        <!-- Status -->
+                        <div class="form-group">
+                            <label for="status" class="form-label">
+                                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                                Status
+                            </label>
+                            <div class="status-select">
+                                <div class="status-indicator status-todo" id="statusIndicator"></div>
+                                <select id="status" name="status" class="form-control">
+                                    <option value="To-Do" selected>To-Do</option>
+                                    <option value="In Progress">In Progress</option>
+                                    <option value="To Be Review">To Be Review</option>
+                                    <option value="Done">Done</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Assignee -->
+                        <div class="form-group">
+                            <label for="assignee_id" class="form-label">
+                                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                Assignee (Optional)
+                            </label>
+                            <select id="assignee_id" name="assignee_id" class="form-control">
+                                <option value="">-- Select Team Member --</option>
+                                {% for user in users %}
+                                <option value="{{ user.id }}">{{ user.username }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-grid two-column">
+                        <!-- Start Date -->
+                        <div class="form-group">
+                            <label for="start_date" class="form-label">
+                                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                Start Date (Optional)
+                            </label>
+                            <input type="date" id="start_date" name="start_date" class="form-control" 
+                                   value="{{ start_date if start_date else '' }}">
+                        </div>
+
+                        <!-- Due Date -->
+                        <div class="form-group">
+                            <label for="due_date" class="form-label">
+                                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Due Date (Optional)
+                            </label>
+                            <input type="date" id="due_date" name="due_date" class="form-control" 
+                                   value="{{ due_date if due_date else '' }}">
+                        </div>
+                    </div>
+
+                    <!-- Submit Buttons -->
+                    <div class="flex flex-col sm:flex-row gap-3 mt-8">
+                        <button type="submit" class="btn btn-primary btn-full sm:btn-auto" id="submitBtn">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                            Create Task
+                        </button>
+                        <a href="{{ url_for('view_tasks', project_id=project.id) }}" class="btn btn-secondary btn-full sm:btn-auto">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Form elements
+            const form = document.getElementById('taskForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const titleInput = document.getElementById('title');
+            const descriptionInput = document.getElementById('description');
+            const statusSelect = document.getElementById('status');
+            const statusIndicator = document.getElementById('statusIndicator');
+            const startDateInput = document.getElementById('start_date');
+            const dueDateInput = document.getElementById('due_date');
+
+            // Character counters
+            const titleCounter = document.getElementById('titleCounter');
+            const descCounter = document.getElementById('descCounter');
+
+            // Auto-hide flash messages
+            const flashMessages = document.querySelectorAll('.flash-messages li');
+            flashMessages.forEach(function(message) {
+                setTimeout(function() {
+                    message.style.opacity = '0';
+                    message.style.transform = 'translateX(100%)';
+                    setTimeout(function() {
+                        message.remove();
+                    }, 300);
+                }, 5000);
+            });
+
+            // Character counter for title
+            titleInput.addEventListener('input', function() {
+                const length = this.value.length;
+                const maxLength = 100;
+                titleCounter.textContent = `${length} / ${maxLength} characters`;
+                
+                if (length > maxLength * 0.9) {
+                    titleCounter.classList.add('error');
+                } else if (length > maxLength * 0.8) {
+                    titleCounter.classList.add('warning');
+                } else {
+                    titleCounter.classList.remove('warning', 'error');
+                }
+                
+                if (length > maxLength) {
+                    this.value = this.value.substring(0, maxLength);
+                    titleCounter.textContent = `${maxLength} / ${maxLength} characters`;
+                }
+            });
+
+            // Character counter for description
+            descriptionInput.addEventListener('input', function() {
+                const length = this.value.length;
+                const maxLength = 500;
+                descCounter.textContent = `${length} / ${maxLength} characters`;
+                
+                if (length > maxLength * 0.9) {
+                    descCounter.classList.add('error');
+                } else if (length > maxLength * 0.8) {
+                    descCounter.classList.add('warning');
+                } else {
+                    descCounter.classList.remove('warning', 'error');
+                }
+                
+                if (length > maxLength) {
+                    this.value = this.value.substring(0, maxLength);
+                    descCounter.textContent = `${maxLength} / ${maxLength} characters`;
+                }
+            });
+
+            // Status indicator
+            statusSelect.addEventListener('change', function() {
+                const value = this.value;
+                statusIndicator.className = 'status-indicator';
+                
+                switch(value) {
+                    case 'To-Do':
+                        statusIndicator.classList.add('status-todo');
+                        break;
+                    case 'In Progress':
+                        statusIndicator.classList.add('status-progress');
+                        break;
+                    case 'To Be Review':
+                        statusIndicator.classList.add('status-review');
+                        break;
+                    case 'Done':
+                        statusIndicator.classList.add('status-done');
+                        break;
+                }
+            });
+
+            // Date validation
+            const today = new Date().toISOString().split('T')[0];
+            
+            startDateInput.addEventListener('change', function() {
+                if (this.value && dueDateInput.value && this.value > dueDateInput.value) {
+                    dueDateInput.value = '';
+                }
+                if (this.value) {
+                    dueDateInput.setAttribute('min', this.value);
+                }
+            });
+
+            dueDateInput.addEventListener('change', function() {
+                if (this.value && startDateInput.value && this.value < startDateInput.value) {
+                    alert('Due date cannot be earlier than start date');
+                    this.value = '';
+                }
+            });
+
+            // Form submission
+            form.addEventListener('submit', function(e) {
+                const title = titleInput.value.trim();
+                
+                if (!title) {
+                    e.preventDefault();
+                    alert('Please enter a task title');
+                    titleInput.focus();
+                    return;
+                }
+                
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = `
+                    <svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-6.219-8.56"/>
+                    </svg>
+                    Creating Task...
+                `;
+                
+                // Re-enable after 3 seconds to prevent permanent lock
+                setTimeout(() => {
+                    if (submitBtn.disabled) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = `
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                            Create Task
+                        `;
+                    }
+                }, 3000);
+            });
+
+            // Button hover effects
+            const buttons = document.querySelectorAll('.btn, .back-button');
+            buttons.forEach(function(btn) {
+                btn.addEventListener('mouseenter', function() {
+                    if (!this.disabled && !this.classList.contains('disabled')) {
+                        this.style.transform = 'translateY(-1px)';
+                    }
+                });
+
+                btn.addEventListener('mouseleave', function() {
+                    if (!this.disabled && !this.classList.contains('disabled')) {
+                        this.style.transform = 'translateY(0)';
+                    }
+                });
+            });
+
+            // Initialize character counters
+            titleInput.dispatchEvent(new Event('input'));
+            descriptionInput.dispatchEvent(new Event('input'));
+        });
+    </script>
+</body>
+
+</html> 

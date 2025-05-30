@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results for "{{ query }}"</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        aura: {
+                            bg: '#0d0e10',
+                            card: '#13141a',
+                            border: '#1f2023',
+                            accent: '#5e6ad2',
+                            purple: '#8b5cf6',
+                            text: '#b4bcd0',
+                            muted: '#7c8794',
+                            darker: '#070707',
+                            lighter: '#1a1a1a'
+                        }
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #212529;
+            margin: 0;
+            padding: 20px; 
+        }
+        .search-container { 
+            max-width: 900px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 25px 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+        }
+        h1 {
+            color: #343a40;
+            margin-bottom: 25px;
+            font-size: 2rem;
+            border-bottom: 1px solid #e9ecef;
+            padding-bottom: 15px;
+        }
+        h1 .query-term {
+            color: #007bff;
+        }
+        h2 {
+            color: #495057;
+            font-size: 1.5rem;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 10px;
+        }
+        ul { list-style: none; padding: 0; }
+        .result-item {
+            background-color: #fff;
+            border: 1px solid #e9ecef;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            transition: box-shadow 0.2s ease-in-out;
+        }
+        .result-item:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .result-item strong a {
+            font-size: 1.25em;
+            color: #007bff;
+            text-decoration: none;
+        }
+        .result-item strong a:hover {
+            text-decoration: underline;
+        }
+        .result-item .result-type {
+            display: inline-block;
+            background-color: #e9ecef;
+            color: #495057;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        .result-item p {
+            margin: 8px 0;
+            color: #495057;
+            line-height: 1.6;
+        }
+        .result-item small {
+            font-size: 0.85em;
+            color: #6c757d;
+            display: block;
+            margin-top: 8px;
+        }
+        .no-results {
+            color: #6c757d;
+            font-style: italic;
+            margin-top: 15px;
+        }
+        .flash-messages { list-style: none; padding: 0; margin-bottom: 20px; }
+        .flash-messages li {
+            padding: 12px 18px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid transparent;
+        }
+        .flash-messages .success { background-color: #d1e7dd; color: #0f5132; border-color: #badbcc; }
+        .flash-messages .danger { background-color: #f8d7da; color: #842029; border-color: #f5c2c7; }
+        .flash-messages .info { background-color: #cff4fc; color: #055160; border-color: #b6effb; }
+        .flash-messages .warning { background-color: #fff3cd; color: #664d03; border-color: #ffecb5; }
+        .nav-link {
+            display: inline-block;
+            margin-bottom: 25px;
+            padding: 10px 15px;
+            background-color: #6c757d;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 0.95em;
+            transition: background-color 0.2s ease;
+        }
+        .nav-link:hover { background-color: #5a6268; }
+        hr {
+            border: 0;
+            height: 1px;
+            background-color: #dee2e6;
+            margin: 30px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="search-container">
+        <a href="{{ url_for('index') }}" class="nav-link">&laquo; Back to Dashboard</a>
+        <h1>Search Results for "<span class="query-term">{{ query }}</span>"</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flash-messages">
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        {% if projects or tasks %}
+            <section id="project-results">
+                <h2>Projects Found</h2>
+                {% if projects %}
+                    <ul>
+                        {% for project in projects %}
+                            <li class="result-item">
+                                <span class="result-type">Project</span>
+                                <strong><a href="{{ url_for('view_tasks', project_id=project.id) }}">{{ project.name }}</a></strong>
+                                <p>{{ project.description if project.description else 'No description available.' }}</p>
+                                <small>Owner: {{ project.owner_user.username }} | Created: {{ project.created_at.strftime('%b %d, %Y') }}</small>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="no-results">No projects matched your search.</p>
+                {% endif %}
+            </section>
+
+            <hr>
+
+            <section id="task-results">
+                <h2>Tasks Found</h2>
+                {% if tasks %}
+                    <ul>
+                        {% for task in tasks %}
+                            <li class="result-item">
+                                <span class="result-type">Task</span>
+                                <strong><a href="{{ url_for('edit_task', task_id=task.id) }}">{{ task.title }}</a></strong> 
+                                (in Project: <a href="{{ url_for('view_tasks', project_id=task.project.id) }}">{{ task.project.name }}</a>)
+                                <p>{{ task.description if task.description else 'No description available.' }}</p>
+                                <small>Status: {{ task.status }} | Assignee: {{ task.assignee_user.username if task.assignee_user else 'Unassigned' }}</small>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="no-results">No tasks matched your search.</p>
+                {% endif %}
+            </section>
+        {% else %}
+            {% if query %}
+                <p class="no-results">No projects or tasks found matching "<span class="query-term">{{ query }}</span>".</p>
+            {% else %}
+                <!-- Message handled by flash if query is empty -->
+            {% endif %}
+        {% endif %}
+    </div>
+</body>
+</html> 
