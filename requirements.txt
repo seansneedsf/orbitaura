@@ -19,6 +19,8 @@ flask-login==0.6.3
     # via social-app (pyproject.toml)
 flask-sqlalchemy==3.1.1
     # via social-app (pyproject.toml)
+gunicorn==23.0.0
+    # via social-app (pyproject.toml)
 idna==3.10
     # via requests
 importlib-metadata==8.7.0
@@ -32,6 +34,8 @@ markupsafe==3.0.2
     #   flask
     #   jinja2
     #   werkzeug
+packaging==25.0
+    # via gunicorn
 requests==2.32.3
     # via social-app (pyproject.toml)
 sqlalchemy==2.0.41
